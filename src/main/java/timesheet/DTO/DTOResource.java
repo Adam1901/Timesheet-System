@@ -3,6 +3,7 @@ package timesheet.DTO;
 import java.io.Serializable;
 
 public class DTOResource implements Serializable {
+	private static final long serialVersionUID = 1L;
 	int resourceId;
 
 	public DTOResource(int resourceId, String resourceName) {
@@ -55,9 +56,12 @@ public class DTOResource implements Serializable {
 		return true;
 	}
 
+	/**
+	 * HACK ALERT
+	 */
 	@Override
 	public String toString() {
-		return "DTOResource [resourceId=" + resourceId + ", resourceName=" + resourceName + "]";
+		return resourceName;
 	}
 
 	String resourceName;

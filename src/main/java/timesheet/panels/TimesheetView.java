@@ -1,7 +1,7 @@
 package timesheet.panels;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 
 import java.awt.GridBagLayout;
 
@@ -18,7 +18,6 @@ import java.awt.event.FocusListener;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JTextField;
@@ -48,7 +47,7 @@ public class TimesheetView extends JPanel {
 	JLabel lblDay5;
 	JLabel lblDay6;
 	JLabel lblDay7;
-	JLabel lblTotal;
+	JLabel lblColumnTotal;
 	JTextField txtTot1;
 	JTextField txtTot2;
 	JTextField txtTot3;
@@ -58,7 +57,7 @@ public class TimesheetView extends JPanel {
 	JTextField txtTot7;
 
 	List<JTextField> txtEndOfRows = new ArrayList<>();
-	private JLabel lblNewLabel;
+	private JLabel lblRowTotal;
 
 	private JLabel[] getLables() {
 		JLabel[] lables = { lblDay1, lblDay2, lblDay3, lblDay4, lblDay5, lblDay6, lblDay7 };
@@ -88,6 +87,8 @@ public class TimesheetView extends JPanel {
 	}
 
 	private void calculateTotals() {
+		if (!validateInput())
+			return;
 
 		List<Row> rows2 = getRows();
 		if (rows2.isEmpty())
@@ -139,6 +140,21 @@ public class TimesheetView extends JPanel {
 
 	}
 
+	private boolean validateInput() {
+		for (Row row : getRows()) {
+			for (JTextField jTextField : row.getTxtRowDay()) {
+				try {
+					Double.valueOf(jTextField.getText());
+					jTextField.setBackground(Color.WHITE);
+				} catch (NumberFormatException e) {
+					jTextField.setBackground(Color.RED);
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
 	private double[] columnSum(double[][] array) {
 		int size = array[0].length;
 		double temp[] = new double[size];
@@ -153,7 +169,7 @@ public class TimesheetView extends JPanel {
 
 	public void repopulateTextFields() throws SQLException, RDNE {
 		rows = new ArrayList<>();
-		lblTotal = null;
+		lblColumnTotal = null;
 		createTextFields();
 		populateTextField();
 		calculateTotals();
@@ -198,11 +214,11 @@ public class TimesheetView extends JPanel {
 			List<JTextField> txt = new ArrayList<>();
 			for (int i = 0; i < 7; i++) {
 				NumberFormat format = NumberFormat.getInstance();
-			    NumberFormatter formatter = new NumberFormatter(format);
-			    formatter.setMinimum(0.0);
-			    formatter.setMaximum(24.0);
-			    formatter.setAllowsInvalid(false);
-			    formatter.setCommitsOnValidEdit(true);
+				NumberFormatter formatter = new NumberFormatter(format);
+				formatter.setMinimum(0.0);
+				formatter.setMaximum(24.0);
+				formatter.setCommitsOnValidEdit(true);
+				formatter.setValueClass(Double.class);
 				JFormattedTextField txtField = new JFormattedTextField(formatter);
 				txtField.setSize(new Dimension(20, 20));
 				GridBagConstraints gbc_textField = new GridBagConstraints();
@@ -215,22 +231,22 @@ public class TimesheetView extends JPanel {
 				txtField.setText("0.0");
 				txtField.setValue(new Double(0.0));
 				txtField.addFocusListener(getFocus());
-		
+
 				txt.add(txtField);
 			}
 
-			JTextField endOfRow = new JTextField();
-			endOfRow.setSize(new Dimension(20, 20));
+			JTextField txtEndOfRowTotal = new JTextField();
+			txtEndOfRowTotal.setSize(new Dimension(20, 20));
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.insets = new Insets(0, 0, 5, 5);
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textField.gridx = x;
 			gbc_textField.gridy = y;
-			add(endOfRow, gbc_textField);
-			endOfRow.setColumns(10);
-			endOfRow.setText("0.0");
-			endOfRow.setEditable(false);
-			txtEndOfRows.add(endOfRow);
+			add(txtEndOfRowTotal, gbc_textField);
+			txtEndOfRowTotal.setColumns(10);
+			txtEndOfRowTotal.setText("0.0");
+			txtEndOfRowTotal.setEditable(false);
+			txtEndOfRows.add(txtEndOfRowTotal);
 
 			DTOProject project = db.getProject(dtoProjectTimeSheet.getProjectId());
 			JLabel lblProject = new JLabel(project.getProjectName());
@@ -246,6 +262,16 @@ public class TimesheetView extends JPanel {
 			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, getFirstDateOfWeek()));
 		}
 
+		// Create separator
+		JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
+		GridBagConstraints gbc_Sep = new GridBagConstraints();
+		gbc_Sep.insets = new Insets(0, 0, 5, 5);
+		gbc_Sep.fill = GridBagConstraints.HORIZONTAL;
+		gbc_Sep.gridx = 1;
+		gbc_Sep.gridwidth = 9;
+		gbc_Sep.gridy = y++;
+		add(sep, gbc_Sep);
+
 		// Create total rows
 		int x2 = 2;
 		for (JTextField jTextField : getTotalBoxes()) {
@@ -259,20 +285,21 @@ public class TimesheetView extends JPanel {
 			jTextField.setColumns(10);
 		}
 
-		lblNewLabel = new JLabel("Total");
+		lblRowTotal = new JLabel("Total");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 9;
 		gbc_lblNewLabel.gridy = 0;
-		add(lblNewLabel, gbc_lblNewLabel);
+		add(lblRowTotal, gbc_lblNewLabel);
 
-		lblTotal = new JLabel("Total");
+		lblColumnTotal = new JLabel("Total");
 		GridBagConstraints gbg = new GridBagConstraints();
 		gbg.anchor = GridBagConstraints.EAST;
 		gbg.insets = new Insets(0, 0, 5, 5);
 		gbg.gridx = 1;
 		gbg.gridy = y;
-		add(lblTotal, gbg);
+		add(lblColumnTotal, gbg);
+
 	}
 
 	private FocusListener getFocus() {
@@ -285,8 +312,6 @@ public class TimesheetView extends JPanel {
 
 			@Override
 			public void focusGained(FocusEvent e) {
-				// TODO Auto-generated method stub
-
 			}
 		};
 	}
@@ -310,10 +335,14 @@ public class TimesheetView extends JPanel {
 	private void jbinit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
 				Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		// HACK ALERT!
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
 		lblDay1 = new JLabel();

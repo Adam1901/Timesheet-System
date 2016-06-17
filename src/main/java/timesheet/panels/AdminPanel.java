@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.awt.event.ActionEvent;
 
 public class AdminPanel extends JPanel {
+	private static final long serialVersionUID = 1L;
 	private JTextField textField;
 	private final JButton btnNewButton = new JButton("Add");
 

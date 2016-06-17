@@ -3,6 +3,7 @@ package timesheet.DTO;
 import java.io.Serializable;
 
 public class DTOProjectTimeSheet implements Serializable {
+	private static final long serialVersionUID = 1L;
 	int project_timesheet_id, projectId, resourceId;
 
 	public DTOProjectTimeSheet() {

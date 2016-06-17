@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.joda.time.DateTime;
 
 public class DTOTime implements Serializable {
+	private static final long serialVersionUID = 1L;
 	DateTime date;
 	double logged;
 	int projectTimsheetId;

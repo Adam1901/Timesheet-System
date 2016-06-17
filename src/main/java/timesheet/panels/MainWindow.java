@@ -9,7 +9,6 @@ import javax.swing.border.EmptyBorder;
 import org.joda.time.DateTime;
 
 import timesheet.Application;
-import timesheet.NYIE;
 import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOTime;
@@ -32,9 +31,6 @@ import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 
@@ -123,11 +119,9 @@ public class MainWindow extends JFrame {
 
 					if (input != null) {
 						dbEngine.addProjectTimeSheet(Application.resource.getResourceId(), input.getProjectId());
-
 						timesheetView.repopulateTextFields();
 					}
 
-					// TODO add project to project timesheet with resource
 				} catch (SQLException | RDNE e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

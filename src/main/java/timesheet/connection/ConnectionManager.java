@@ -27,7 +27,7 @@ public class ConnectionManager {
 		dataSource.setPassword("P3QCtz2eHy");
 		dataSource.setMaxWaitMillis(10000);
 		dataSource.setMaxIdle(10);
-		dataSource.setMaxConnLifetimeMillis(5000);
+		dataSource.setMaxConnLifetimeMillis(7000);
 		dataSource.setMaxTotal(30);
 	}
 
