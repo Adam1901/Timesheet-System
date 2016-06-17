@@ -1,15 +1,9 @@
 package timesheet.panels;
 
-import javax.swing.JPanel;
-import java.awt.GridBagLayout;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-
 import java.awt.GridBagConstraints;
-import javax.swing.UIManager;
-import javax.swing.border.SoftBevelBorder;
-import javax.swing.border.BevelBorder;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -17,36 +11,25 @@ import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.LineBorder;
-import java.awt.Color;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.MatteBorder;
-import javax.swing.border.TitledBorder;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFormattedTextField.AbstractFormatter;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
 
-import org.jdatepicker.JDatePicker;
 import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import org.joda.time.DateTime;
 
-import timesheet.Application;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOResource;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.connection.DBEngine.Report;
-
-import javax.swing.JComboBox;
-import javax.swing.JFormattedTextField;
-import javax.swing.JFormattedTextField.AbstractFormatter;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.sql.SQLException;
-import java.awt.event.ActionEvent;
-import javax.swing.JCheckBox;
-import javax.swing.JTextPane;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 
 public class ReportView extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -154,15 +137,13 @@ public class ReportView extends JPanel {
 		add(lblProject, gbc_lblProject);
 
 		JCheckBox chckbxNewCheckBox = new JCheckBox("Use All projects?");
-		chckbxNewCheckBox.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if (chckbxNewCheckBox.isSelected()) {
-					cmbProjectList.setEnabled(false);
-					cmbProjectList.setSelectedIndex(-1);
-				} else {
-					cmbProjectList.setEnabled(true);
-					cmbProjectList.setSelectedIndex(0);
-				}
+		chckbxNewCheckBox.addActionListener(arg0 -> {
+			if (chckbxNewCheckBox.isSelected()) {
+				cmbProjectList.setEnabled(false);
+				cmbProjectList.setSelectedIndex(-1);
+			} else {
+				cmbProjectList.setEnabled(true);
+				cmbProjectList.setSelectedIndex(0);
 			}
 		});
 		GridBagConstraints gbc_chckbxNewCheckBox = new GridBagConstraints();
@@ -180,36 +161,33 @@ public class ReportView extends JPanel {
 		add(cmbProjectList, gbc_cmbProjectList);
 
 		JButton btnRunReport = new JButton("Run Report");
-		btnRunReport.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				DbEngine db = new DbEngine();
-				try {
-					Report report = new Report();
-					if (chckbxNewCheckBox.isSelected()) {
-						report.setUseAllProjects(true);
-					} else {
-						report.setUseAllProjects(false);
-						report.setProject((DTOProject) cmbProjectList.getSelectedItem());
-					}
-					DTOResource selectedUser = (DTOResource) cmbUserList.getSelectedItem();
-					report.setResource(selectedUser);
-					report.setEnd(getDateTime(endDatePicker));
-					report.setStart(getDateTime(startDatePicker));
-					String runReport = db.runReport(report);
-					System.out.println(runReport);
-					StringBuilder stringBuilder = new StringBuilder();
-					stringBuilder.append(textPane.getText());
-					stringBuilder.append("\n");
-					stringBuilder.append(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
-					stringBuilder.append(": Report ran for: \"").append(selectedUser.getResourceName());
-					stringBuilder.append("\". For project: \"").append(chckbxNewCheckBox.isSelected() ? "All"
-							: ((DTOProject) cmbProjectList.getSelectedItem()).getProjectName());
-					stringBuilder.append("\". The amount of time looged is: ").append(runReport);
-					textPane.setText(stringBuilder.toString());
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+		btnRunReport.addActionListener(arg0 -> {
+			DbEngine db = new DbEngine();
+			try {
+				Report report = new Report();
+				if (chckbxNewCheckBox.isSelected()) {
+					report.setUseAllProjects(true);
+				} else {
+					report.setUseAllProjects(false);
+					report.setProject((DTOProject) cmbProjectList.getSelectedItem());
 				}
+				DTOResource selectedUser = (DTOResource) cmbUserList.getSelectedItem();
+				report.setResource(selectedUser);
+				report.setEnd(getDateTime(endDatePicker));
+				report.setStart(getDateTime(startDatePicker));
+				String runReport = db.runReport(report);
+				System.out.println(runReport);
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.append(textPane.getText());
+				stringBuilder.append("\n");
+				stringBuilder.append(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
+				stringBuilder.append(": Report ran for: \"").append(selectedUser.getResourceName());
+				stringBuilder.append("\". For project: \"").append(chckbxNewCheckBox.isSelected() ? "All"
+						: ((DTOProject) cmbProjectList.getSelectedItem()).getProjectName());
+				stringBuilder.append("\". The amount of time looged is: ").append(runReport);
+				textPane.setText(stringBuilder.toString());
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
 		});
 		GridBagConstraints gbc_btnRunReport = new GridBagConstraints();

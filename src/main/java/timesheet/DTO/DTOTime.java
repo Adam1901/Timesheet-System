@@ -9,9 +9,8 @@ public class DTOTime implements Serializable {
 	DateTime date;
 	double logged;
 	int projectTimsheetId;
-	
+
 	public DTOTime() {
-		// TODO Auto-generated constructor stub
 	}
 
 	public DateTime getDate() {

@@ -1,17 +1,10 @@
 package timesheet.panels;
 
-import javax.swing.JPanel;
-import javax.swing.JSeparator;
-
-import java.awt.GridBagLayout;
-
-import javax.swing.JFormattedTextField;
-import javax.swing.JLabel;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -20,6 +13,10 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JFormattedTextField;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.text.NumberFormatter;
 
@@ -40,6 +37,8 @@ public class TimesheetView extends JPanel {
 
 	private List<Row> rows = new ArrayList<>();
 
+	private DateTime dateTime = new DateTime();
+
 	JLabel lblDay1;
 	JLabel lblDay2;
 	JLabel lblDay3;
@@ -55,6 +54,8 @@ public class TimesheetView extends JPanel {
 	JTextField txtTot5;
 	JTextField txtTot6;
 	JTextField txtTot7;
+
+	JSeparator sep;
 
 	List<JTextField> txtEndOfRows = new ArrayList<>();
 	private JLabel lblRowTotal;
@@ -78,7 +79,7 @@ public class TimesheetView extends JPanel {
 	public TimesheetView() throws SQLException, RDNE {
 
 		jbinit();
-		labelTextInit();
+		labelTextInit(getDateTime());
 		createTextFields();
 		populateTextField();
 		calculateTotals();
@@ -116,6 +117,7 @@ public class TimesheetView extends JPanel {
 			}
 			for (int k = 0; k < txtEndOfRows.size(); k++) {
 				JTextField jTextField = txtEndOfRows.get(k);
+				// TODO: FIX THIS
 				jTextField.setText(String.valueOf(totalRowTime[k]));
 			}
 		}
@@ -169,7 +171,10 @@ public class TimesheetView extends JPanel {
 
 	public void repopulateTextFields() throws SQLException, RDNE {
 		rows = new ArrayList<>();
+		lblColumnTotal.setText("");
 		lblColumnTotal = null;
+		remove(sep);
+		sep = null;
 		createTextFields();
 		populateTextField();
 		calculateTotals();
@@ -259,11 +264,11 @@ public class TimesheetView extends JPanel {
 
 			y++;
 
-			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, getFirstDateOfWeek()));
+			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, getFirstDateOfWeek(getDateTime())));
 		}
 
 		// Create separator
-		JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
+		sep = new JSeparator(JSeparator.HORIZONTAL);
 		GridBagConstraints gbc_Sep = new GridBagConstraints();
 		gbc_Sep.insets = new Insets(0, 0, 5, 5);
 		gbc_Sep.fill = GridBagConstraints.HORIZONTAL;
@@ -316,8 +321,8 @@ public class TimesheetView extends JPanel {
 		};
 	}
 
-	private void labelTextInit() {
-		DateTime first = getFirstDateOfWeek();
+	public void labelTextInit(DateTime dateTime) {
+		DateTime first = getFirstDateOfWeek(dateTime);
 		DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE / dd");
 		for (Component component : getLables()) {
 			((JLabel) component).setText(fmt.print(first));
@@ -325,8 +330,7 @@ public class TimesheetView extends JPanel {
 		}
 	}
 
-	private DateTime getFirstDateOfWeek() {
-		DateTime dateTime = new DateTime();
+	private DateTime getFirstDateOfWeek(DateTime dateTime) {
 		long firstDayOfWeekTimestamp = dateTime.withDayOfWeek(1).getMillis();
 		DateTime first = new DateTime(firstDayOfWeekTimestamp);
 		return first;
@@ -413,5 +417,13 @@ public class TimesheetView extends JPanel {
 
 	public List<Row> getRows() {
 		return rows;
+	}
+
+	public DateTime getDateTime() {
+		return dateTime;
+	}
+
+	public void setDateTime(DateTime dateTime) {
+		this.dateTime = dateTime;
 	}
 }

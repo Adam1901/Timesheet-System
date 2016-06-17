@@ -19,6 +19,7 @@ public class Application {
 
 	public static void main(String[] args)
 			throws ClassNotFoundException, SQLException, RDNE, UnsupportedLookAndFeelException {
+		Props.setProperty("test", "test");
 		UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
 		String text = JOptionPane.showInputDialog(null, "Please enter your name to log in.");
 		if (text != null) {
@@ -28,6 +29,8 @@ public class Application {
 		}
 
 		resource = new DbEngine().getResource(Application.name);
+		Props.setProperty("name", name);
+		Props.setProperty("resName", resource.getResourceName());
 		MainWindow frame = new MainWindow();
 		frame.setVisible(true);
 	}

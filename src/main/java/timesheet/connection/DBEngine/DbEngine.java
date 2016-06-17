@@ -224,4 +224,19 @@ public class DbEngine {
 		return String.valueOf(i);
 	}
 
+	public boolean addResource(String text) throws SQLException {
+		String sql = "INSERT INTO resource (resource_name) VALUES (?)";
+
+		try (Connection connection = ConnectionManager.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql);) {
+			ps.setString(1, text);
+			int executeUpdate = ps.executeUpdate();
+			if (executeUpdate == 1) {
+				connection.commit();
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
 }

@@ -1,2 +1,4 @@
 *.prefs
 *.class
+config.properties
+connections.txt

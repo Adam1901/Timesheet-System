@@ -1,25 +1,25 @@
 package timesheet.panels;
 
-import javax.swing.JPanel;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import timesheet.connection.DBEngine.DbEngine;
-
-import java.awt.GridBagConstraints;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-
-import java.awt.Insets;
-import javax.swing.JButton;
-import java.awt.event.ActionListener;
-import java.sql.SQLException;
-import java.awt.event.ActionEvent;
 
 public class AdminPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 	private JTextField textField;
 	private final JButton btnNewButton = new JButton("Add");
+	private JTextField txtResource;
 
 	public AdminPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -50,6 +50,7 @@ public class AdminPanel extends JPanel {
 		gbc_btnNewButton.gridx = 2;
 		gbc_btnNewButton.gridy = 0;
 		btnNewButton.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				String project = textField.getText();
 				try {
@@ -63,11 +64,47 @@ public class AdminPanel extends JPanel {
 		});
 		add(btnNewButton, gbc_btnNewButton);
 
+		JLabel lblAddAResource = new JLabel("Add a resource");
+		GridBagConstraints gbc_lblAddAResource = new GridBagConstraints();
+		gbc_lblAddAResource.anchor = GridBagConstraints.EAST;
+		gbc_lblAddAResource.insets = new Insets(0, 0, 5, 5);
+		gbc_lblAddAResource.gridx = 0;
+		gbc_lblAddAResource.gridy = 1;
+		add(lblAddAResource, gbc_lblAddAResource);
+
+		txtResource = new JTextField();
+		GridBagConstraints gbc_txtResource = new GridBagConstraints();
+		gbc_txtResource.insets = new Insets(0, 0, 5, 5);
+		gbc_txtResource.fill = GridBagConstraints.HORIZONTAL;
+		gbc_txtResource.gridx = 1;
+		gbc_txtResource.gridy = 1;
+		add(txtResource, gbc_txtResource);
+		txtResource.setColumns(10);
+
+		JButton btnNewButton_1 = new JButton("Add");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if (!new DbEngine().addResource(txtResource.getText()))
+						JOptionPane.showConfirmDialog(null, "FAILED");
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
+		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewButton_1.gridx = 2;
+		gbc_btnNewButton_1.gridy = 1;
+		add(btnNewButton_1, gbc_btnNewButton_1);
+
 		JLabel lblNoteCannotBe = new JLabel("Note cannot be removed!");
 		GridBagConstraints gbc_lblNoteCannotBe = new GridBagConstraints();
-		gbc_lblNoteCannotBe.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNoteCannotBe.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNoteCannotBe.gridx = 1;
-		gbc_lblNoteCannotBe.gridy = 1;
+		gbc_lblNoteCannotBe.gridy = 2;
 		add(lblNoteCannotBe, gbc_lblNoteCannotBe);
 	}
 
