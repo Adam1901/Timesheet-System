@@ -11,7 +11,9 @@ import java.awt.event.FocusListener;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -29,7 +31,6 @@ import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOProjectTimeSheet;
 import timesheet.DTO.DTOTime;
-import timesheet.DTO.ViewProjectTimesheet;
 import timesheet.connection.DBEngine.DbEngine;
 
 public class TimesheetView extends JPanel {
@@ -54,6 +55,7 @@ public class TimesheetView extends JPanel {
 	JTextField txtTot5;
 	JTextField txtTot6;
 	JTextField txtTot7;
+	JTextField txtTotTotal;
 
 	JSeparator sep;
 
@@ -117,7 +119,7 @@ public class TimesheetView extends JPanel {
 			}
 			for (int k = 0; k < txtEndOfRows.size(); k++) {
 				JTextField jTextField = txtEndOfRows.get(k);
-				// TODO: FIX THIS
+				// TODO still a bug :( hmmm
 				jTextField.setText(String.valueOf(totalRowTime[k]));
 			}
 		}
@@ -137,6 +139,19 @@ public class TimesheetView extends JPanel {
 					totalBoxes[j].setBackground(Color.GREEN);
 				}
 				totalBoxes[j].setText(String.valueOf(d));
+			}
+
+			double tmp = 0.0;
+			for (double d : totalTime) {
+				tmp += d;
+			}
+			txtTotTotal.setText(String.valueOf(tmp));
+			if (tmp < Application.hoursInWeek) {
+				txtTotTotal.setBackground(Color.RED);
+			} else if (tmp == Application.hoursInWeek) {
+				txtTotTotal.setBackground(Color.YELLOW);
+			} else if (tmp > Application.hoursInWeek) {
+				txtTotTotal.setBackground(Color.GREEN);
 			}
 		}
 
@@ -184,17 +199,27 @@ public class TimesheetView extends JPanel {
 
 	public void populateTextField() throws SQLException, RDNE {
 		DbEngine db = new DbEngine();
+		HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db
+				.getLoggedTimeByResource(Application.resource);
+
 		for (Row row : getRows()) {
-
-			ViewProjectTimesheet loggedTimeByResourceByPojectTS = db
-					.getLoggedTimeByResourceByPojectTS(Application.resource, row.getProjectTimesheet());
-
-			List<DTOTime> datesToLookAt = loggedTimeByResourceByPojectTS.getTime();
+			List<DTOTime> times = null;
+			for (Entry<DTOProjectTimeSheet, List<DTOTime>> entry : loggedTimeByResource.entrySet()) {
+				if (row.getProjectTimesheet().equals(entry.getKey())) {
+					times = entry.getValue();
+					break;
+				}
+			}
+			if (times == null) {
+				System.out.println("FAILZ");
+				times = new ArrayList<>();
+				// System.exit(0);
+			}
 
 			List<JTextField> txtRowDay = row.getTxtRowDay();
 			DateTime firstDayOfWeek = row.getDates();
 			for (JTextField jTextField : txtRowDay) {
-				for (DTOTime dtoTime : datesToLookAt) {
+				for (DTOTime dtoTime : times) {
 					if (firstDayOfWeek.withTimeAtStartOfDay().equals(dtoTime.getDate().withTimeAtStartOfDay())) {
 						String valueOf = String.valueOf(dtoTime.getLogged());
 						if (valueOf == null || valueOf.equals(""))
@@ -213,6 +238,9 @@ public class TimesheetView extends JPanel {
 
 		List<DTOProjectTimeSheet> allProjectsTimeSheetForResource = db
 				.getAllProjectsTimeSheetForResource(Application.resource);
+
+		// Perf fix
+		List<DTOProject> allProject = db.getAllProject();
 		int y = 1;
 		for (DTOProjectTimeSheet dtoProjectTimeSheet : allProjectsTimeSheetForResource) {
 			int x = 2;
@@ -225,7 +253,9 @@ public class TimesheetView extends JPanel {
 				formatter.setCommitsOnValidEdit(true);
 				formatter.setValueClass(Double.class);
 				JFormattedTextField txtField = new JFormattedTextField(formatter);
-				txtField.setSize(new Dimension(20, 20));
+				txtField.setSize(new Dimension(10, 25));
+				txtField.setPreferredSize(new Dimension(10, 25));
+				txtField.setSize(new Dimension(10, 25));
 				GridBagConstraints gbc_textField = new GridBagConstraints();
 				gbc_textField.insets = new Insets(0, 0, 5, 5);
 				gbc_textField.fill = GridBagConstraints.HORIZONTAL;
@@ -241,7 +271,9 @@ public class TimesheetView extends JPanel {
 			}
 
 			JTextField txtEndOfRowTotal = new JTextField();
-			txtEndOfRowTotal.setSize(new Dimension(20, 20));
+			txtEndOfRowTotal.setPreferredSize(new Dimension(10, 25));
+			txtEndOfRowTotal.setSize(new Dimension(10, 25));
+			txtEndOfRowTotal.setSize(new Dimension(10, 25));
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.insets = new Insets(0, 0, 5, 5);
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
@@ -253,7 +285,12 @@ public class TimesheetView extends JPanel {
 			txtEndOfRowTotal.setEditable(false);
 			txtEndOfRows.add(txtEndOfRowTotal);
 
-			DTOProject project = db.getProject(dtoProjectTimeSheet.getProjectId());
+			DTOProject project = null;
+			for (DTOProject dtoProject : allProject) {
+				if (dtoProject.getProjectId() == dtoProjectTimeSheet.getProjectId()) {
+					project = dtoProject;
+				}
+			}
 			JLabel lblProject = new JLabel(project.getProjectName());
 			GridBagConstraints gbc_lblProject = new GridBagConstraints();
 			gbc_lblProject.insets = new Insets(0, 0, 5, 5);
@@ -282,6 +319,8 @@ public class TimesheetView extends JPanel {
 		for (JTextField jTextField : getTotalBoxes()) {
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.insets = new Insets(0, 0, 5, 5);
+			jTextField.setPreferredSize(new Dimension(10, 25));
+			jTextField.setSize(new Dimension(10, 25));
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textField.gridx = x2++;
 			gbc_textField.gridy = y;
@@ -289,6 +328,17 @@ public class TimesheetView extends JPanel {
 			jTextField.setEditable(false);
 			jTextField.setColumns(10);
 		}
+
+		txtTotTotal = new JTextField();
+		GridBagConstraints gbc_textField = new GridBagConstraints();
+		gbc_textField.insets = new Insets(0, 0, 5, 5);
+		gbc_textField.gridx = x2++;
+		gbc_textField.gridy = y;
+		txtTotTotal.setPreferredSize(new Dimension(10, 25));
+		txtTotTotal.setSize(new Dimension(10, 25));
+		add(txtTotTotal, gbc_textField);
+		txtTotTotal.setEditable(false);
+		txtTotTotal.setColumns(10);
 
 		lblRowTotal = new JLabel("Total");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
@@ -323,7 +373,7 @@ public class TimesheetView extends JPanel {
 
 	public void labelTextInit(DateTime dateTime) {
 		DateTime first = getFirstDateOfWeek(dateTime);
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE / dd");
+		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
 		for (Component component : getLables()) {
 			((JLabel) component).setText(fmt.print(first));
 			first = first.plusDays(1);
@@ -413,6 +463,7 @@ public class TimesheetView extends JPanel {
 		txtTot5 = new JTextField();
 		txtTot6 = new JTextField();
 		txtTot7 = new JTextField();
+		txtTotTotal = new JTextField();
 	}
 
 	public List<Row> getRows() {

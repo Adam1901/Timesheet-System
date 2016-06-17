@@ -3,6 +3,8 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,6 +18,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -25,6 +28,8 @@ import org.jdatepicker.impl.JDatePanelImpl;
 import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOResource;
@@ -63,7 +68,7 @@ public class ReportView extends JPanel {
 		gridBagLayout.columnWidths = new int[] { 5, 0, 0, 0, 0, 0, 5, 0 };
 		gridBagLayout.rowHeights = new int[] { 5, 0, 0, 0, 0, 0, 5, 0 };
 		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
 		JLabel lblNewLabel = new JLabel("User");
@@ -74,11 +79,30 @@ public class ReportView extends JPanel {
 		gbc_lblNewLabel.gridy = 1;
 		add(lblNewLabel, gbc_lblNewLabel);
 
+		JCheckBox chcUseUsers = new JCheckBox("Use all users?");
+		chcUseUsers.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (chcUseUsers.isSelected()) {
+					cmbUserList.setEnabled(false);
+					cmbUserList.setSelectedIndex(-1);
+				} else {
+					cmbUserList.setEnabled(true);
+					cmbUserList.setSelectedIndex(0);
+				}
+			}
+		});
+		GridBagConstraints gbc_chcUseUsers = new GridBagConstraints();
+		gbc_chcUseUsers.insets = new Insets(0, 0, 5, 5);
+		gbc_chcUseUsers.gridx = 2;
+		gbc_chcUseUsers.gridy = 1;
+		add(chcUseUsers, gbc_chcUseUsers);
+
 		GridBagConstraints gbc_cmbUserList = new GridBagConstraints();
-		gbc_cmbUserList.gridwidth = 4;
+		gbc_cmbUserList.gridwidth = 3;
 		gbc_cmbUserList.insets = new Insets(0, 0, 5, 5);
 		gbc_cmbUserList.fill = GridBagConstraints.HORIZONTAL;
-		gbc_cmbUserList.gridx = 2;
+		gbc_cmbUserList.gridx = 3;
 		gbc_cmbUserList.gridy = 1;
 		add(cmbUserList, gbc_cmbUserList);
 
@@ -171,23 +195,33 @@ public class ReportView extends JPanel {
 					report.setUseAllProjects(false);
 					report.setProject((DTOProject) cmbProjectList.getSelectedItem());
 				}
-				DTOResource selectedUser = (DTOResource) cmbUserList.getSelectedItem();
-				report.setResource(selectedUser);
+				if (chcUseUsers.isSelected()) {
+					report.setUseAllUsers(true);
+				} else {
+					report.setUseAllUsers(false);
+					report.setResource((DTOResource) cmbUserList.getSelectedItem());
+				}
+
 				report.setEnd(getDateTime(endDatePicker));
 				report.setStart(getDateTime(startDatePicker));
 				String runReport = db.runReport(report);
 				System.out.println(runReport);
+
+				DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+
 				StringBuilder stringBuilder = new StringBuilder();
 				stringBuilder.append(textPane.getText());
-				stringBuilder.append("\n");
-				stringBuilder.append(new SimpleDateFormat("dd/MM/yyyy").format(new Date()));
-				stringBuilder.append(": Report ran for: \"").append(selectedUser.getResourceName());
+				stringBuilder.append("Report ran for: \"").append(chcUseUsers.isSelected() ? "All"
+						: ((DTOResource) cmbUserList.getSelectedItem()).getResourceName());
 				stringBuilder.append("\". For project: \"").append(chckbxNewCheckBox.isSelected() ? "All"
 						: ((DTOProject) cmbProjectList.getSelectedItem()).getProjectName());
-				stringBuilder.append("\". The amount of time looged is: ").append(runReport);
+				stringBuilder.append("\". The time was logged between: ").append(fmt.print(report.getStart()));
+				stringBuilder.append(" - ").append(fmt.print(report.getEnd()));
+				stringBuilder.append(". The amount of time looged is: ").append(runReport).append(" hours.");
+				stringBuilder.append("\n");
 				textPane.setText(stringBuilder.toString());
 			} catch (SQLException e) {
-				e.printStackTrace();
+				JOptionPane.showConfirmDialog(null, "FAILED");
 			}
 		});
 		GridBagConstraints gbc_btnRunReport = new GridBagConstraints();

@@ -39,4 +39,21 @@ public class Props {
 		}
 
 	}
+
+	public static void deleteProperty(String string) {
+		try (InputStream input = new FileInputStream("config.properties");) {
+			prop.load(input);
+			// set the properties value
+			prop.remove(string);
+			// save properties to project root folder
+			try (OutputStream output = new FileOutputStream("config.properties");) {
+				prop.store(output, null);
+			}
+
+		} catch (IOException io) {
+			io.printStackTrace();
+			throw new RuntimeException("value not deleted for key: " + string);
+		}
+
+	}
 }

@@ -10,7 +10,15 @@ public class Report {
 	private DTOProject project;
 	private DateTime start;
 	private DateTime end;
-	boolean useAllProjects;
+	boolean useAllProjects, useAllUsers;
+
+	public boolean isUseAllUsers() {
+		return useAllUsers;
+	}
+
+	public void setUseAllUsers(boolean useAllUsers) {
+		this.useAllUsers = useAllUsers;
+	}
 
 	public DTOResource getResource() {
 		return resource;

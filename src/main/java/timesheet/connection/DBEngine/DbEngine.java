@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -21,6 +22,7 @@ import timesheet.connection.ConnectionManager;
 public class DbEngine {
 	// Lazy day, todo refactor out
 
+	@Deprecated
 	public ViewProjectTimesheet getLoggedTimeByResourceByPojectTS(DTOResource res, DTOProjectTimeSheet projectTS)
 			throws SQLException {
 		// use SB
@@ -42,6 +44,39 @@ public class DbEngine {
 			}
 		}
 		return new ViewProjectTimesheet(time, projectTS);
+	}
+
+	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(DTOResource res) throws SQLException {
+		String sql = "SELECT date, timelogged, t.project_timesheet_id, resource_id, project_id FROM time t "
+				+ "join project_timesheet pt where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ?";
+		HashMap<DTOProjectTimeSheet, List<DTOTime>> ret = new HashMap<>();
+		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);) {
+			ps.setInt(1, res.getResourceId());
+			try (ResultSet rs = ps.executeQuery()) {
+				while (rs.next()) {
+					int i = 1;
+					Date date = rs.getDate(i++);
+					double timeLogged = rs.getDouble(i++);
+					int ptid = rs.getInt(i++);
+					int rid = rs.getInt(i++);
+					int pid = rs.getInt(i++);
+
+					DTOProjectTimeSheet dtoPt = new DTOProjectTimeSheet(ptid, pid, rid);
+					DTOTime dtoTime = new DTOTime(new DateTime(date.getTime()), timeLogged, ptid);
+
+					boolean containsKey = ret.containsKey(dtoPt);
+					if (containsKey) {
+						List<DTOTime> list2 = ret.get(dtoPt);
+						list2.add(dtoTime);
+					} else {
+						List<DTOTime> value = new ArrayList<>();
+						value.add(dtoTime);
+						ret.put(dtoPt, value);
+					}
+				}
+			}
+		}
+		return ret;
 	}
 
 	public List<DTOProjectTimeSheet> getAllProjectsTimeSheetForResource(DTOResource res) throws SQLException {
@@ -169,8 +204,8 @@ public class DbEngine {
 		}
 	}
 
-	public void saveTimes(List<DTOTime> times, DTOResource resource, DTOProjectTimeSheet projectTimesheet)
-			throws SQLException {
+	public void saveTimes(Connection connection, List<DTOTime> times, DTOResource resource,
+			DTOProjectTimeSheet projectTimesheet) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(" INSERT INTO time ");
 		sb.append(" (date, timelogged, project_timesheet_id) ");
@@ -179,16 +214,13 @@ public class DbEngine {
 		sb.append(" ON DUPLICATE KEY UPDATE ");
 		sb.append("  timelogged     = VALUES(timelogged) ");
 
-		try (Connection connection = ConnectionManager.getConnection();) {
-			for (DTOTime dtoTime : times) {
-				try (PreparedStatement ps = connection.prepareStatement(sb.toString());) {
-					ps.setDate(1, new Date(dtoTime.getDate().getMillis()));
-					ps.setDouble(2, dtoTime.getLogged());
-					ps.setInt(3, projectTimesheet.getProject_timesheet_id());
-					ps.executeUpdate();
-				}
+		for (DTOTime dtoTime : times) {
+			try (PreparedStatement ps = connection.prepareStatement(sb.toString());) {
+				ps.setDate(1, new Date(dtoTime.getDate().getMillis()));
+				ps.setDouble(2, dtoTime.getLogged());
+				ps.setInt(3, projectTimesheet.getProject_timesheet_id());
+				ps.executeUpdate();
 			}
-			connection.commit();
 		}
 	}
 
@@ -200,14 +232,16 @@ public class DbEngine {
 		sb.append(" WHERE t.project_timesheet_id = pt.project_timesheet_id ");
 		if (!report.isUseAllProjects())
 			sb.append(" AND project_id = ? ");
-		sb.append(" AND resource_id = ? ");
+		if (!report.isUseAllUsers())
+			sb.append(" AND resource_id = ? ");
 		sb.append(" AND date between ? and ?");
 
 		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sb.toString());) {
 			int col0 = 1;
 			if (!report.isUseAllProjects())
 				ps.setInt(col0++, report.getProject().getProjectId());
-			ps.setInt(col0++, report.getResource().getResourceId());
+			if (!report.isUseAllUsers())
+				ps.setInt(col0++, report.getResource().getResourceId());
 			ps.setDate(col0++, new Date(report.getStart().getMillis()));
 			ps.setDate(col0++, new Date(report.getEnd().getMillis()));
 			try (ResultSet rs = ps.executeQuery()) {

@@ -89,7 +89,6 @@ public class AdminPanel extends JPanel {
 					if (!new DbEngine().addResource(txtResource.getText()))
 						JOptionPane.showConfirmDialog(null, "FAILED");
 				} catch (SQLException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}

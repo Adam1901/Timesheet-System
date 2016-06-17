@@ -16,17 +16,25 @@ public class Application {
 	public static String name = null;
 	public static DTOResource resource;
 	public static double hoursInDay = 7.5;
+	public static double hoursInWeek = 37.5;
 
 	public static void main(String[] args)
 			throws ClassNotFoundException, SQLException, RDNE, UnsupportedLookAndFeelException {
 		Props.setProperty("test", "test");
 		UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
-		String text = JOptionPane.showInputDialog(null, "Please enter your name to log in.");
-		if (text != null) {
-			name = text;
+		String property = Props.getProperty("username");
+		String namee = null;
+		if (property == null || property.trim().equals("")) {
+			namee = JOptionPane.showInputDialog(null, "Please enter your name to log in.");
+		} else {
+			namee = property;
+		}
+		if (namee != null) {
+			name = namee;
 		} else {
 			System.exit(0);
 		}
+		Props.setProperty("username", name);
 
 		resource = new DbEngine().getResource(Application.name);
 		Props.setProperty("name", name);
