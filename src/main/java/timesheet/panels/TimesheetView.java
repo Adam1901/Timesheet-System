@@ -136,11 +136,11 @@ public class TimesheetView extends JPanel {
 			JTextField[] totalBoxes = getTotalBoxes();
 			for (int j = 0; j < totalBoxes.length; j++) {
 				double d = totalTime[j];
-				if (d < Application.HOURS_IN_WEEK) {
+				if (d < Application.HOURS_IN_DAY) {
 					totalBoxes[j].setBackground(Color.RED);
-				} else if (d == Application.HOURS_IN_WEEK) {
+				} else if (d == Application.HOURS_IN_DAY) {
 					totalBoxes[j].setBackground(Color.YELLOW);
-				} else if (d > Application.HOURS_IN_WEEK) {
+				} else if (d > Application.HOURS_IN_DAY) {
 					totalBoxes[j].setBackground(Color.GREEN);
 				}
 				totalBoxes[j].setText(String.valueOf(d));

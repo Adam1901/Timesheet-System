@@ -22,15 +22,15 @@ public class Application {
 			throws ClassNotFoundException, SQLException, RDNE, UnsupportedLookAndFeelException {
 		Props.setProperty("test", "test");
 		UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
-		String property = Props.getProperty("username");
-		String namee = null;
-		if (property == null || property.trim().equals("")) {
-			namee = JOptionPane.showInputDialog(null, "Please enter your name to log in.");
+		String propertyName = args.length == 0 ? Props.getProperty("username") : null;
+		String nameToUse = null;
+		if (propertyName == null || propertyName.trim().equals("")) {
+			nameToUse = JOptionPane.showInputDialog(null, "Please enter your name to log in.");
 		} else {
-			namee = property;
+			nameToUse = propertyName;
 		}
-		if (namee != null) {
-			name = namee;
+		if (nameToUse != null) {
+			name = nameToUse;
 		} else {
 			System.exit(0);
 		}

@@ -70,6 +70,5 @@ public class Props {
 			io.printStackTrace();
 			throw new RuntimeException("value not deleted for key: " + string);
 		}
-
 	}
 }

@@ -115,7 +115,9 @@ public class DbEngine {
 
 	public DTOResource getResource(String name) throws SQLException, RDNE {
 		String sql = "SELECT resource_id, resource_name FROM resource where resource_name = ?";
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);) {
+
+		try (Connection connection = ConnectionManager.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setString(1, name);
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -207,7 +209,8 @@ public class DbEngine {
 			sb.append(" AND resource_id = ? ");
 		sb.append(" AND date between ? and ?");
 
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sb.toString());) {
+		try (Connection connection = ConnectionManager.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sb.toString());) {
 			int col0 = 1;
 			if (!report.isUseAllProjects())
 				ps.setInt(col0++, report.getProject().getProjectId());

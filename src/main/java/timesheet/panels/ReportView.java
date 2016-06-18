@@ -221,6 +221,7 @@ public class ReportView extends JPanel {
 				stringBuilder.append("\n");
 				textPane.setText(stringBuilder.toString());
 			} catch (SQLException e) {
+				e.printStackTrace();
 				JOptionPane.showConfirmDialog(null, "FAILED");
 			}
 		});

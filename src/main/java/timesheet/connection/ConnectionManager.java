@@ -34,7 +34,6 @@ public class ConnectionManager {
 		connectionCount++;
 		connection.setAutoCommit(false);
 		System.out.println(connectionCount + " - end");
-
 		return connection;
 	}
 
