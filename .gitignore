@@ -2,3 +2,4 @@
 *.class
 config.properties
 connections.txt
+target

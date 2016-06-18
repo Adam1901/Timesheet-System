@@ -3,8 +3,7 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,8 +32,10 @@ import org.joda.time.format.DateTimeFormatter;
 
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOResource;
+import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.connection.DBEngine.Report;
+import timesheet.utils.DateUtils;
 
 public class ReportView extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -51,15 +52,15 @@ public class ReportView extends JPanel {
 
 	private void fillCmbBoxes() throws SQLException {
 		DbEngine db = new DbEngine();
-		List<DTOProject> allProject = db.getAllProject();
-		List<DTOResource> allResources = db.getAllResources();
-
-		for (DTOResource dtoResource : allResources) {
-			cmbUserList.addItem(dtoResource);
-		}
-		for (DTOProject dtoProject : allProject) {
-
-			cmbProjectList.addItem(dtoProject);
+		try (Connection connection = ConnectionManager.getConnection();) {
+			List<DTOProject> allProject = db.getAllProject(connection);
+			List<DTOResource> allResources = db.getAllResources(connection);
+			for (DTOResource dtoResource : allResources) {
+				cmbUserList.addItem(dtoResource);
+			}
+			for (DTOProject dtoProject : allProject) {
+				cmbProjectList.addItem(dtoProject);
+			}
 		}
 	}
 
@@ -80,16 +81,13 @@ public class ReportView extends JPanel {
 		add(lblNewLabel, gbc_lblNewLabel);
 
 		JCheckBox chcUseUsers = new JCheckBox("Use all users?");
-		chcUseUsers.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (chcUseUsers.isSelected()) {
-					cmbUserList.setEnabled(false);
-					cmbUserList.setSelectedIndex(-1);
-				} else {
-					cmbUserList.setEnabled(true);
-					cmbUserList.setSelectedIndex(0);
-				}
+		chcUseUsers.addActionListener(e -> {
+			if (chcUseUsers.isSelected()) {
+				cmbUserList.setEnabled(false);
+				cmbUserList.setSelectedIndex(-1);
+			} else {
+				cmbUserList.setEnabled(true);
+				cmbUserList.setSelectedIndex(0);
 			}
 		});
 		GridBagConstraints gbc_chcUseUsers = new GridBagConstraints();
@@ -110,13 +108,15 @@ public class ReportView extends JPanel {
 		p.put("text.today", "Today");
 		p.put("text.month", "Month");
 		p.put("text.year", "Year");
-		JDatePanelImpl datePanel = new JDatePanelImpl(new UtilDateModel(), p);
+		DateTime date = DateUtils.getFirstDateOfWeek(new DateTime());
+		JDatePanelImpl datePanel = new JDatePanelImpl(createDateModel(date), p);
 
 		Properties p1 = new Properties();
 		p1.put("text.today1", "Today");
 		p1.put("text.month1", "Month");
 		p1.put("text.year1", "Year");
-		JDatePanelImpl datePanel2 = new JDatePanelImpl(new UtilDateModel(), p);
+		date = date.plusDays(6);
+		JDatePanelImpl datePanel2 = new JDatePanelImpl(createDateModel(date), p);
 
 		JLabel lblNewLabel_1 = new JLabel("StartDate:");
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
@@ -245,6 +245,17 @@ public class ReportView extends JPanel {
 		textPane = new JTextPane();
 		scrollPane.setViewportView(textPane);
 		textPane.setEditable(false);
+	}
+
+	private UtilDateModel createDateModel(DateTime date) {
+		UtilDateModel utilDateModel = new UtilDateModel();
+		int year = date.getYear();
+		int monthOfYear = date.getMonthOfYear() - 1; // Stupid java 0 based
+														// month /facepalm
+		int dayOfMonth = date.getDayOfMonth();
+		utilDateModel.setDate(year, monthOfYear, dayOfMonth);
+		utilDateModel.setSelected(true);
+		return utilDateModel;
 	}
 
 	private DateTime getDateTime(JDatePickerImpl date) {

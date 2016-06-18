@@ -15,8 +15,8 @@ import timesheet.panels.MainWindow;
 public class Application {
 	public static String name = null;
 	public static DTOResource resource;
-	public static double hoursInDay = 7.5;
-	public static double hoursInWeek = 37.5;
+	public static double HOURS_IN_DAY = 7.5;
+	public static double HOURS_IN_WEEK = 37.5;
 
 	public static void main(String[] args)
 			throws ClassNotFoundException, SQLException, RDNE, UnsupportedLookAndFeelException {

@@ -73,8 +73,8 @@ public class MainWindow extends JFrame {
 
 		tabbedPane.addTab("Timesheet", null, scrollFrame, null);
 		tabbedPane.addTab("Reports", null, new ReportView(), null);
-		if (Application.name.toLowerCase().equals("admin"))
-			;
+		// TODO implement
+		// if (Application.name.toLowerCase().equals("admin"))
 		tabbedPane.addTab("Admin", null, new AdminPanel(), null);
 		tabbedPane.addTab("About", null, new AboutPanel(), null);
 
@@ -215,8 +215,7 @@ public class MainWindow extends JFrame {
 		gbc_btnsave.gridy = 2;
 		contentPane.add(btnSave, gbc_btnsave);
 
-		setTitle("Hello " + Application.resource.getResourceName()
-				+ ", Welcome to timesheet. Made by Adam Meadows of Qmatic UK");
+		setTitle("Hello " + Application.resource.getResourceName() + ", Welcome to timesheet!");
 	}
 
 }

@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -31,7 +32,9 @@ import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOProjectTimeSheet;
 import timesheet.DTO.DTOTime;
+import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
+import timesheet.utils.DateUtils;
 
 public class TimesheetView extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -82,8 +85,10 @@ public class TimesheetView extends JPanel {
 
 		jbinit();
 		labelTextInit(getDateTime());
-		createTextFields();
-		populateTextField();
+		try (Connection connection = ConnectionManager.getConnection();) {
+			createTextFields(connection);
+			populateTextField(connection);
+		}
 		calculateTotals();
 		repaint();
 		validate();
@@ -131,11 +136,11 @@ public class TimesheetView extends JPanel {
 			JTextField[] totalBoxes = getTotalBoxes();
 			for (int j = 0; j < totalBoxes.length; j++) {
 				double d = totalTime[j];
-				if (d < Application.hoursInDay) {
+				if (d < Application.HOURS_IN_WEEK) {
 					totalBoxes[j].setBackground(Color.RED);
-				} else if (d == Application.hoursInDay) {
+				} else if (d == Application.HOURS_IN_WEEK) {
 					totalBoxes[j].setBackground(Color.YELLOW);
-				} else if (d > Application.hoursInDay) {
+				} else if (d > Application.HOURS_IN_WEEK) {
 					totalBoxes[j].setBackground(Color.GREEN);
 				}
 				totalBoxes[j].setText(String.valueOf(d));
@@ -146,11 +151,11 @@ public class TimesheetView extends JPanel {
 				tmp += d;
 			}
 			txtTotTotal.setText(String.valueOf(tmp));
-			if (tmp < Application.hoursInWeek) {
+			if (tmp < Application.HOURS_IN_WEEK) {
 				txtTotTotal.setBackground(Color.RED);
-			} else if (tmp == Application.hoursInWeek) {
+			} else if (tmp == Application.HOURS_IN_WEEK) {
 				txtTotTotal.setBackground(Color.YELLOW);
-			} else if (tmp > Application.hoursInWeek) {
+			} else if (tmp > Application.HOURS_IN_WEEK) {
 				txtTotTotal.setBackground(Color.GREEN);
 			}
 		}
@@ -190,17 +195,19 @@ public class TimesheetView extends JPanel {
 		lblColumnTotal = null;
 		remove(sep);
 		sep = null;
-		createTextFields();
-		populateTextField();
+		try (Connection connection = ConnectionManager.getConnection();) {
+			createTextFields(connection);
+			populateTextField(connection);
+		}
 		calculateTotals();
 		repaint();
 		validate();
 	}
 
-	public void populateTextField() throws SQLException, RDNE {
+	public void populateTextField(Connection connection) throws SQLException, RDNE {
 		DbEngine db = new DbEngine();
-		HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db
-				.getLoggedTimeByResource(Application.resource);
+		HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db.getLoggedTimeByResource(connection,
+				Application.resource);
 
 		for (Row row : getRows()) {
 			List<DTOTime> times = null;
@@ -233,14 +240,14 @@ public class TimesheetView extends JPanel {
 
 	}
 
-	private void createTextFields() throws SQLException, RDNE {
+	private void createTextFields(Connection connection) throws SQLException, RDNE {
 		DbEngine db = new DbEngine();
 
-		List<DTOProjectTimeSheet> allProjectsTimeSheetForResource = db
-				.getAllProjectsTimeSheetForResource(Application.resource);
+		List<DTOProjectTimeSheet> allProjectsTimeSheetForResource = db.getAllProjectsTimeSheetForResource(connection,
+				Application.resource);
 
 		// Perf fix
-		List<DTOProject> allProject = db.getAllProject();
+		List<DTOProject> allProject = db.getAllProject(connection);
 		int y = 1;
 		for (DTOProjectTimeSheet dtoProjectTimeSheet : allProjectsTimeSheetForResource) {
 			int x = 2;
@@ -301,7 +308,7 @@ public class TimesheetView extends JPanel {
 
 			y++;
 
-			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, getFirstDateOfWeek(getDateTime())));
+			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, DateUtils.getFirstDateOfWeek(getDateTime())));
 		}
 
 		// Create separator
@@ -372,18 +379,12 @@ public class TimesheetView extends JPanel {
 	}
 
 	public void labelTextInit(DateTime dateTime) {
-		DateTime first = getFirstDateOfWeek(dateTime);
+		DateTime first = DateUtils.getFirstDateOfWeek(dateTime);
 		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
 		for (Component component : getLables()) {
 			((JLabel) component).setText(fmt.print(first));
 			first = first.plusDays(1);
 		}
-	}
-
-	private DateTime getFirstDateOfWeek(DateTime dateTime) {
-		long firstDayOfWeekTimestamp = dateTime.withDayOfWeek(1).getMillis();
-		DateTime first = new DateTime(firstDayOfWeekTimestamp);
-		return first;
 	}
 
 	private void jbinit() {

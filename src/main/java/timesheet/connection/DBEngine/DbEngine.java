@@ -46,11 +46,12 @@ public class DbEngine {
 		return new ViewProjectTimesheet(time, projectTS);
 	}
 
-	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(DTOResource res) throws SQLException {
+	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(Connection connection, DTOResource res)
+			throws SQLException {
 		String sql = "SELECT date, timelogged, t.project_timesheet_id, resource_id, project_id FROM time t "
 				+ "join project_timesheet pt where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ?";
 		HashMap<DTOProjectTimeSheet, List<DTOTime>> ret = new HashMap<>();
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);) {
+		try (PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setInt(1, res.getResourceId());
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -79,12 +80,13 @@ public class DbEngine {
 		return ret;
 	}
 
-	public List<DTOProjectTimeSheet> getAllProjectsTimeSheetForResource(DTOResource res) throws SQLException {
+	public List<DTOProjectTimeSheet> getAllProjectsTimeSheetForResource(Connection connection, DTOResource res)
+			throws SQLException {
 		List<DTOProjectTimeSheet> pts = new ArrayList<>();
 
 		String sql = "SELECT project_timesheet_id, resource_id, project_id FROM project_timesheet WHERE resource_id = ?";
 
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);) {
+		try (PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setInt(1, res.getResourceId());
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -99,34 +101,11 @@ public class DbEngine {
 		return pts;
 	}
 
-	public List<DTOProjectTimeSheet> getProjectTimeSheetForResource(DTOResource res, int project_id)
-			throws SQLException {
-		List<DTOProjectTimeSheet> pts = new ArrayList<>();
-
-		String sql = "SELECT project_timesheet, resource_id, project_id_id FROM project_timesheet WHERE resource_id = ? AND project_id = ?";
-
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);) {
-			ps.setInt(1, res.getResourceId());
-			ps.setInt(2, project_id);
-			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
-					int i = 1;
-					int ptid = rs.getInt(i++);
-					int rid = rs.getInt(i++);
-					int pid = rs.getInt(i++);
-					pts.add(new DTOProjectTimeSheet(ptid, pid, rid));
-				}
-			}
-		}
-		return pts;
-	}
-
-	public List<DTOResource> getAllResources() throws SQLException {
+	public List<DTOResource> getAllResources(Connection connection) throws SQLException {
 		List<DTOResource> resources = new ArrayList<DTOResource>();
 
 		String sql = "SELECT resource_id, resource_name FROM resource";
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);
-				ResultSet rs = ps.executeQuery()) {
+		try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
 				resources.add(new DTOResource(rs.getInt(1), rs.getString(2)));
 			}
@@ -147,24 +126,16 @@ public class DbEngine {
 		throw new RDNE(name);
 	}
 
-	public DTOProject getProject(int projectId) throws SQLException, RDNE {
-		String sql = "SELECT project_id, project_name FROM project where project_id = ?";
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);) {
-			ps.setInt(1, projectId);
-			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
-					return new DTOProject(rs.getInt(1), rs.getString(2));
-				}
-			}
+	public List<DTOProject> getAllProject() throws SQLException {
+		try (Connection connection = ConnectionManager.getConnection();) {
+			return getAllProject(connection);
 		}
-		throw new RDNE();
 	}
 
-	public List<DTOProject> getAllProject() throws SQLException {
+	public List<DTOProject> getAllProject(Connection connection) throws SQLException {
 		List<DTOProject> projects = new ArrayList<>();
 		String sql = "SELECT project_id, project_name FROM project";
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);
-				ResultSet rs = ps.executeQuery()) {
+		try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
 				projects.add(new DTOProject(rs.getInt(1), rs.getString(2)));
 			}
