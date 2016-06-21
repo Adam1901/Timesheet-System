@@ -3,8 +3,6 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.sql.SQLException;
 
 import javax.swing.JButton;
@@ -49,17 +47,14 @@ public class AdminPanel extends JPanel {
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
 		gbc_btnNewButton.gridx = 2;
 		gbc_btnNewButton.gridy = 0;
-		btnNewButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String project = textField.getText();
-				try {
-					if (!new DbEngine().addProject(project))
-						JOptionPane.showConfirmDialog(null, "FAILED");
-				} catch (SQLException e1) {
-					JOptionPane.showConfirmDialog(null, "FAILED\nPerhaps it already exists?");
-					e1.printStackTrace();
-				}
+		btnNewButton.addActionListener(e -> {
+			String project = textField.getText();
+			try {
+				if (!new DbEngine().addProject(project))
+					JOptionPane.showConfirmDialog(null, "FAILED");
+			} catch (SQLException e1) {
+				JOptionPane.showConfirmDialog(null, "FAILED\nPerhaps it already exists?");
+				e1.printStackTrace();
 			}
 		});
 		add(btnNewButton, gbc_btnNewButton);
@@ -82,15 +77,12 @@ public class AdminPanel extends JPanel {
 		txtResource.setColumns(10);
 
 		JButton btnNewButton_1 = new JButton("Add");
-		btnNewButton_1.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
-					if (!new DbEngine().addResource(txtResource.getText()))
-						JOptionPane.showConfirmDialog(null, "FAILED");
-				} catch (SQLException e1) {
-					e1.printStackTrace();
-				}
+		btnNewButton_1.addActionListener(e -> {
+			try {
+				if (!new DbEngine().addResource(txtResource.getText()))
+					JOptionPane.showConfirmDialog(null, "FAILED");
+			} catch (SQLException e1) {
+				e1.printStackTrace();
 			}
 		});
 		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();

@@ -11,6 +11,7 @@ import com.seaglasslookandfeel.SeaGlassLookAndFeel;
 import timesheet.DTO.DTOResource;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.panels.MainWindow;
+import timesheet.utils.Utils;
 
 public class Application {
 	public static String name = null;
@@ -24,7 +25,8 @@ public class Application {
 		UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
 		String propertyName = args.length == 0 ? Props.getProperty("username") : null;
 		String nameToUse = null;
-		if (propertyName == null || propertyName.trim().equals("")) {
+
+		if (Utils.isStringNullOrEmpty(propertyName)) {
 			nameToUse = JOptionPane.showInputDialog(null, "Please enter your name to log in.");
 		} else {
 			nameToUse = propertyName;
@@ -40,7 +42,7 @@ public class Application {
 		Props.setProperty("name", name);
 		Props.setProperty("resName", resource.getResourceName());
 		MainWindow frame = new MainWindow();
+		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
-
 }

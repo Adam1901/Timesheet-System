@@ -16,35 +16,10 @@ import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOProjectTimeSheet;
 import timesheet.DTO.DTOResource;
 import timesheet.DTO.DTOTime;
-import timesheet.DTO.ViewProjectTimesheet;
 import timesheet.connection.ConnectionManager;
 
 public class DbEngine {
 	// Lazy day, todo refactor out
-
-	@Deprecated
-	public ViewProjectTimesheet getLoggedTimeByResourceByPojectTS(DTOResource res, DTOProjectTimeSheet projectTS)
-			throws SQLException {
-		// use SB
-		String sql = "SELECT date, timelogged, t. project_timesheet_id FROM time t " + "join project_timesheet pt "
-				+ "where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ? and pt.project_timesheet_id = ?";
-		List<DTOTime> time = new ArrayList<>();
-		try (PreparedStatement ps = ConnectionManager.getConnection().prepareStatement(sql);) {
-			ps.setInt(1, res.getResourceId());
-			ps.setInt(2, projectTS.getProject_timesheet_id());
-			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
-					int i = 1;
-					Date date = rs.getDate(i++);
-					double timeLogged = rs.getDouble(i++);
-					int ptid = rs.getInt(i++);
-
-					time.add(new DTOTime(new DateTime(date), timeLogged, ptid));
-				}
-			}
-		}
-		return new ViewProjectTimesheet(time, projectTS);
-	}
 
 	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(Connection connection, DTOResource res)
 			throws SQLException {

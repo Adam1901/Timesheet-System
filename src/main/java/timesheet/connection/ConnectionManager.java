@@ -14,11 +14,9 @@ public class ConnectionManager {
 
 	static {
 		dataSource.setDriverClassName("com.mysql.jdbc.Driver");
-
 		dataSource.setUrl(Props.getProperty("connectionString"));
 		dataSource.setUsername(Props.getProperty("dbusername"));
 		dataSource.setPassword(Props.getProperty("dbpassword"));
-
 		dataSource.setMaxWaitMillis(10000);
 		dataSource.setMaxIdle(10);
 		dataSource.setMaxConnLifetimeMillis(20000);

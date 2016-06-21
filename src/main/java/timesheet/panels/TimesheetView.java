@@ -34,7 +34,7 @@ import timesheet.DTO.DTOProjectTimeSheet;
 import timesheet.DTO.DTOTime;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
-import timesheet.utils.DateUtils;
+import timesheet.utils.Utils;
 
 public class TimesheetView extends JPanel {
 	private static final long serialVersionUID = 1L;
@@ -146,6 +146,7 @@ public class TimesheetView extends JPanel {
 				totalBoxes[j].setText(String.valueOf(d));
 			}
 
+			// Set colour the bottom right total
 			double tmp = 0.0;
 			for (double d : totalTime) {
 				tmp += d;
@@ -158,8 +159,8 @@ public class TimesheetView extends JPanel {
 			} else if (tmp > Application.HOURS_IN_WEEK) {
 				txtTotTotal.setBackground(Color.GREEN);
 			}
-		}
 
+		}
 	}
 
 	private boolean validateInput() {
@@ -308,7 +309,7 @@ public class TimesheetView extends JPanel {
 
 			y++;
 
-			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, DateUtils.getFirstDateOfWeek(getDateTime())));
+			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, Utils.getFirstDateOfWeek(getDateTime())));
 		}
 
 		// Create separator
@@ -379,7 +380,7 @@ public class TimesheetView extends JPanel {
 	}
 
 	public void labelTextInit(DateTime dateTime) {
-		DateTime first = DateUtils.getFirstDateOfWeek(dateTime);
+		DateTime first = Utils.getFirstDateOfWeek(dateTime);
 		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
 		for (Component component : getLables()) {
 			((JLabel) component).setText(fmt.print(first));

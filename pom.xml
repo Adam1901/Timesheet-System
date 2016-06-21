@@ -4,11 +4,11 @@
 
 	<groupId>timesheet</groupId>
 	<artifactId>timesheet</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>timesheet</name>
-	<url>http://maven.apache.org</url>
+	<url>http://qmatic.com</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
