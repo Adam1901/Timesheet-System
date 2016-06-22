@@ -5,6 +5,8 @@ import java.text.Format;
 import javax.swing.JFormattedTextField;
 
 public class AJFormattedTextField extends JFormattedTextField {
+	private static final long serialVersionUID = 1L;
+
 	public AJFormattedTextField() {
 		super();
 	}

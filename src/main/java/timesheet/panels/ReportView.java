@@ -19,7 +19,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
@@ -36,7 +35,8 @@ import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOResource;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
-import timesheet.connection.DBEngine.Report;
+import timesheet.connection.DBEngine.ReportDbEngine;
+import timesheet.connection.DBEngine.ReportParameters;
 import timesheet.utils.Utils;
 
 public class ReportView extends JPanel {
@@ -191,9 +191,9 @@ public class ReportView extends JPanel {
 
 		JButton btnRunReport = new JButton("Run Report");
 		btnRunReport.addActionListener(arg0 -> {
-			DbEngine db = new DbEngine();
+			ReportDbEngine db = new ReportDbEngine();
 			try {
-				Report report = new Report();
+				ReportParameters report = new ReportParameters();
 				if (chckbxNewCheckBox.isSelected()) {
 					report.setUseAllProjects(true);
 				} else {
@@ -227,7 +227,7 @@ public class ReportView extends JPanel {
 				textPane.setText(stringBuilder.toString());
 			} catch (SQLException e) {
 				LOGGER.log(Level.SEVERE, "", e);
-				JOptionPane.showConfirmDialog(null, "FAILED");
+				MainWindow.sendErrorNotification("Failed to run report");
 			}
 		});
 		GridBagConstraints gbc_btnRunReport = new GridBagConstraints();

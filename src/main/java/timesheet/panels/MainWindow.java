@@ -121,14 +121,17 @@ public class MainWindow extends JFrame {
 						try {
 							new DbEngine().saveTimes(connection, times, Application.resource,
 									row.getProjectTimesheet());
+							sendNotification("Save success!");
 						} catch (SQLException e) {
 							LOGGER.log(Level.SEVERE, "", e);
+							sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
 						}
 					}
 				}
 				connection.commit();
 			} catch (SQLException e1) {
 				LOGGER.log(Level.SEVERE, "", e1);
+				sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
 			}
 			Date end = new Date();
 			LOGGER.info("EndSave " + (end.getTime() - start.getTime()));
@@ -179,6 +182,7 @@ public class MainWindow extends JFrame {
 			System.out.println(getSize());
 			Props.deleteProperty("username");
 			Props.deleteProperty("password");
+			sendErrorNotification("LOGGED OUT");
 		});
 		GridBagConstraints gbc_btnDebug = new GridBagConstraints();
 		gbc_btnDebug.insets = new Insets(0, 0, 5, 5);
@@ -287,7 +291,7 @@ public class MainWindow extends JFrame {
 
 	public static void sendNotification(String text) {
 		lblNotify.setText("Status: " + text);
-		lblNotify.setForeground(Color.WHITE);
+		lblNotify.setForeground(Color.BLACK);
 	}
 
 	public static void sendErrorNotification(String text) {

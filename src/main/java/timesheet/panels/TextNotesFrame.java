@@ -15,6 +15,7 @@ import javax.swing.JTextArea;
 import timesheet.components.AJFormattedTextField;
 
 public class TextNotesFrame extends JFrame {
+	private static final long serialVersionUID = 1L;
 	String notes;
 
 	public TextNotesFrame(AJFormattedTextField txt) {

@@ -3,7 +3,6 @@ package timesheet.panels;
 import java.util.List;
 
 import javax.swing.JLabel;
-import javax.swing.JTextField;
 
 import org.joda.time.DateTime;
 

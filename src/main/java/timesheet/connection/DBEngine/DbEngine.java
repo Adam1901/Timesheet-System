@@ -23,16 +23,23 @@ public class DbEngine {
 
 	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(Connection connection, DTOResource res,
 			DateTime dateTime) throws SQLException {
-		String sql = "SELECT date, timelogged, t.project_timesheet_id, resource_id, project_id, t.notes FROM time t "
-				+ "join project_timesheet pt where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ? "
-				+ "AND t.date between ? AND ? ";
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(
+				"SELECT date, timelogged, t.project_timesheet_id, resource_id, project_id, t.notes FROM time t ");
+		stringBuilder.append(
+				"join project_timesheet pt where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ? ");
+		if (dateTime != null)
+			stringBuilder.append("AND t.date between ? AND ? ");
+		String sql = stringBuilder.toString();
 		HashMap<DTOProjectTimeSheet, List<DTOTime>> ret = new HashMap<>();
 		try (PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setInt(1, res.getResourceId());
 			DateTime dateTime2 = dateTime;
-			ps.setDate(2, new Date(dateTime2.getMillis()));
-			dateTime2 = dateTime2.plusDays(7);
-			ps.setDate(3, new Date(dateTime2.getMillis()));
+			if (dateTime != null) {
+				ps.setDate(2, new Date(dateTime2.getMillis()));
+				dateTime2 = dateTime2.plusDays(7);
+				ps.setDate(3, new Date(dateTime2.getMillis()));
+			}
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
 					int i = 1;
@@ -178,41 +185,6 @@ public class DbEngine {
 				ps.executeUpdate();
 			}
 		}
-	}
-
-	public String runReport(Report report) throws SQLException {
-		List<Double> total = new ArrayList<>();
-		StringBuilder sb = new StringBuilder();
-		sb.append("SELECT timelogged ");
-		sb.append(" FROM time t, project_timesheet pt ");
-		sb.append(" WHERE t.project_timesheet_id = pt.project_timesheet_id ");
-		if (!report.isUseAllProjects())
-			sb.append(" AND project_id = ? ");
-		if (!report.isUseAllUsers())
-			sb.append(" AND resource_id = ? ");
-		sb.append(" AND date between ? and ?");
-
-		try (Connection connection = ConnectionManager.getConnection();
-				PreparedStatement ps = connection.prepareStatement(sb.toString());) {
-			int col0 = 1;
-			if (!report.isUseAllProjects())
-				ps.setInt(col0++, report.getProject().getProjectId());
-			if (!report.isUseAllUsers())
-				ps.setInt(col0++, report.getResource().getResourceId());
-			ps.setDate(col0++, new Date(report.getStart().getMillis()));
-			ps.setDate(col0++, new Date(report.getEnd().getMillis()));
-			try (ResultSet rs = ps.executeQuery()) {
-				while (rs.next()) {
-					total.add(rs.getDouble(1));
-				}
-			}
-		}
-
-		int i = 0;
-		for (Double doublea : total) {
-			i += doublea;
-		}
-		return String.valueOf(i);
 	}
 
 	public boolean addResource(String text) throws SQLException {

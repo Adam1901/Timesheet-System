@@ -5,7 +5,7 @@ import org.joda.time.DateTime;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOResource;
 
-public class Report {
+public class ReportParameters {
 	private DTOResource resource;
 	private DTOProject project;
 	private DateTime start;

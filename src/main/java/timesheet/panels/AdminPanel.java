@@ -54,9 +54,11 @@ public class AdminPanel extends JPanel {
 			String project = textField.getText();
 			try {
 				if (!new DbEngine().addProject(project))
-					JOptionPane.showConfirmDialog(null, "FAILED");
+					MainWindow.sendErrorNotification(
+							"Failed to add project. Perhaps it already exists? Please restart the application");
 			} catch (SQLException e1) {
-				JOptionPane.showConfirmDialog(null, "FAILED\nPerhaps it already exists?");
+				MainWindow.sendErrorNotification(
+						"Failed to add project. Perhaps it already exists? Please restart the application");
 				LOGGER.log(Level.SEVERE, "failed to add", e1);
 			}
 		});

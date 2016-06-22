@@ -3,12 +3,18 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+
+import timesheet.fun.Achievement;
 
 public class AboutPanel extends JPanel {
 	int easter = 0;
@@ -16,12 +22,12 @@ public class AboutPanel extends JPanel {
 	public AboutPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 5, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 5, 0 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 5, 0 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
-		JLabel lblIfYouEnconter = new JLabel("If you enconter any issues. Please restart the application");
+		JLabel lblIfYouEnconter = new JLabel("If you enconter any issues or bugs. Please restart the application");
 		GridBagConstraints gbc_lblIfYouEnconter = new GridBagConstraints();
 		gbc_lblIfYouEnconter.gridwidth = 2;
 		gbc_lblIfYouEnconter.anchor = GridBagConstraints.WEST;
@@ -30,7 +36,7 @@ public class AboutPanel extends JPanel {
 		gbc_lblIfYouEnconter.gridy = 1;
 		add(lblIfYouEnconter, gbc_lblIfYouEnconter);
 
-		JLabel lblIfTheyPresist = new JLabel("If they presist, ask adam");
+		JLabel lblIfTheyPresist = new JLabel("If they presist, ask Adam!");
 		lblIfTheyPresist.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -47,12 +53,29 @@ public class AboutPanel extends JPanel {
 		gbc_lblIfTheyPresist.gridy = 2;
 		add(lblIfTheyPresist, gbc_lblIfTheyPresist);
 
+		JButton btnDidYouWin = new JButton("Did you win?");
+		btnDidYouWin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					new Achievement().calculateAchievements();
+				} catch (SQLException ee) {
+				}
+			}
+		});
+		GridBagConstraints gbc_btnDidYouWin = new GridBagConstraints();
+		gbc_btnDidYouWin.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnDidYouWin.insets = new Insets(0, 0, 5, 5);
+		gbc_btnDidYouWin.gridx = 2;
+		gbc_btnDidYouWin.gridy = 5;
+		add(btnDidYouWin, gbc_btnDidYouWin);
+
 		JLabel lblNewLabel = new JLabel("Made by Adam Meadows of Qmatic UK");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.EAST;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 2;
-		gbc_lblNewLabel.gridy = 4;
+		gbc_lblNewLabel.gridy = 6;
 		add(lblNewLabel, gbc_lblNewLabel);
 	}
 

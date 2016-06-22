@@ -47,7 +47,6 @@ public class Props {
 
 	public static String getProperty(String propKey) {
 		try (InputStream input = new FileInputStream(CONFIG_PROPERTIES);) {
-
 			// load a properties file
 			prop.load(input);
 			return prop.getProperty(propKey);

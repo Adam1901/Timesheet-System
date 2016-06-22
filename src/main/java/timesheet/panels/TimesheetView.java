@@ -96,75 +96,6 @@ public class TimesheetView extends JPanel {
 		validate();
 	}
 
-	private void calculateTotals() {
-		if (!validateInput())
-			return;
-
-		List<Row> rows2 = getRows();
-		if (rows2.isEmpty())
-			return;
-		double time[][] = new double[rows2.size()][7];
-		for (int i = 0; i < getRows().size(); i++) {
-			Row row = getRows().get(i);
-			for (int j = 0; j < row.getTxtRowDay().size(); j++) {
-				JTextField jTextField = row.getTxtRowDay().get(j);
-				double timeLogged = Double.valueOf(jTextField.getText());
-				time[i][j] = timeLogged;
-			}
-		}
-
-		// gets the total for the end of the rows
-		int it = 0;
-		{
-			double totalRowTime[] = new double[getRows().size()];
-			for (double[] x : time) {
-				double tmp = 0.0;
-				for (double y : x) {
-					tmp += y;
-				}
-				totalRowTime[it++] = tmp;
-			}
-			for (int k = 0; k < txtEndOfRows.size(); k++) {
-				JTextField jTextField = txtEndOfRows.get(k);
-				// TODO still a bug :( hmmm
-				jTextField.setText(String.valueOf(totalRowTime[k]));
-			}
-		}
-		{
-			// gets the column totals
-			double totalTime[] = columnSum(time);
-
-			// sets totals at bottom
-			JTextField[] totalBoxes = getTotalBoxes();
-			for (int j = 0; j < totalBoxes.length; j++) {
-				double d = totalTime[j];
-				if (d < Application.HOURS_IN_DAY) {
-					totalBoxes[j].setBackground(Color.RED);
-				} else if (d == Application.HOURS_IN_DAY) {
-					totalBoxes[j].setBackground(Color.YELLOW);
-				} else if (d > Application.HOURS_IN_DAY) {
-					totalBoxes[j].setBackground(Color.GREEN);
-				}
-				totalBoxes[j].setText(String.valueOf(d));
-			}
-
-			// Set colour the bottom right total
-			double tmp = 0.0;
-			for (double d : totalTime) {
-				tmp += d;
-			}
-			txtTotTotal.setText(String.valueOf(tmp));
-			if (tmp < Application.HOURS_IN_WEEK) {
-				txtTotTotal.setBackground(Color.RED);
-			} else if (tmp == Application.HOURS_IN_WEEK) {
-				txtTotTotal.setBackground(Color.YELLOW);
-			} else if (tmp > Application.HOURS_IN_WEEK) {
-				txtTotTotal.setBackground(Color.GREEN);
-			}
-
-		}
-	}
-
 	private boolean validateInput() {
 		for (Row row : getRows()) {
 			for (JTextField jTextField : row.getTxtRowDay()) {
@@ -500,6 +431,8 @@ public class TimesheetView extends JPanel {
 		txtTot6 = new JTextField();
 		txtTot7 = new JTextField();
 		txtTotTotal = new JTextField();
+
+		MainWindow.sendNotification("You can press F4 to add a note to logged time!");
 	}
 
 	public List<Row> getRows() {
@@ -512,5 +445,74 @@ public class TimesheetView extends JPanel {
 
 	public void setDateTime(DateTime dateTime) {
 		this.dateTime = dateTime;
+	}
+
+	private void calculateTotals() {
+		if (!validateInput())
+			return;
+
+		List<Row> rows2 = getRows();
+		if (rows2.isEmpty())
+			return;
+		double time[][] = new double[rows2.size()][7];
+		for (int i = 0; i < getRows().size(); i++) {
+			Row row = getRows().get(i);
+			for (int j = 0; j < row.getTxtRowDay().size(); j++) {
+				JTextField jTextField = row.getTxtRowDay().get(j);
+				double timeLogged = Double.valueOf(jTextField.getText());
+				time[i][j] = timeLogged;
+			}
+		}
+
+		// gets the total for the end of the rows
+		int it = 0;
+		{
+			double totalRowTime[] = new double[getRows().size()];
+			for (double[] x : time) {
+				double tmp = 0.0;
+				for (double y : x) {
+					tmp += y;
+				}
+				totalRowTime[it++] = tmp;
+			}
+			for (int k = 0; k < txtEndOfRows.size(); k++) {
+				JTextField jTextField = txtEndOfRows.get(k);
+				// TODO still a bug :( hmmm
+				jTextField.setText(String.valueOf(totalRowTime[k]));
+			}
+		}
+		{
+			// gets the column totals
+			double totalTime[] = columnSum(time);
+
+			// sets totals at bottom
+			JTextField[] totalBoxes = getTotalBoxes();
+			for (int j = 0; j < totalBoxes.length; j++) {
+				double d = totalTime[j];
+				if (d < Application.HOURS_IN_DAY) {
+					totalBoxes[j].setBackground(Color.RED);
+				} else if (d == Application.HOURS_IN_DAY) {
+					totalBoxes[j].setBackground(Color.YELLOW);
+				} else if (d > Application.HOURS_IN_DAY) {
+					totalBoxes[j].setBackground(Color.GREEN);
+				}
+				totalBoxes[j].setText(String.valueOf(d));
+			}
+
+			// Set colour the bottom right total
+			double tmp = 0.0;
+			for (double d : totalTime) {
+				tmp += d;
+			}
+			txtTotTotal.setText(String.valueOf(tmp));
+			if (tmp < Application.HOURS_IN_WEEK) {
+				txtTotTotal.setBackground(Color.RED);
+			} else if (tmp == Application.HOURS_IN_WEEK) {
+				txtTotTotal.setBackground(Color.YELLOW);
+			} else if (tmp > Application.HOURS_IN_WEEK) {
+				txtTotTotal.setBackground(Color.GREEN);
+			}
+
+		}
 	}
 }
