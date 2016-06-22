@@ -54,7 +54,12 @@ public class MainWindow extends JFrame {
 		setBounds(100, 100, 763, 537);
 		setSize(1090, 372);
 
-		createImages();
+		try {
+			createImages();
+		} catch (Exception e2) {
+			System.out.println("Couldn't create image for icon");
+			e2.printStackTrace();
+		}
 
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -213,7 +218,7 @@ public class MainWindow extends JFrame {
 		setTitle("Hello " + Application.resource.getResourceName() + ", Welcome to timesheet!");
 	}
 
-	private void createImages() {
+	private void createImages() throws Exception {
 		ImageIcon createImageIcon = createImageIcon("icon.png", "a");
 		Image image = createImageIcon.getImage();
 		setIconImage(image);
