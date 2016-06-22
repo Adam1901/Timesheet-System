@@ -8,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.NumberFormat;
@@ -16,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
 
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -32,6 +33,7 @@ import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOProjectTimeSheet;
 import timesheet.DTO.DTOTime;
+import timesheet.components.AJFormattedTextField;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.utils.Utils;
@@ -41,7 +43,7 @@ public class TimesheetView extends JPanel {
 
 	private List<Row> rows = new ArrayList<>();
 
-	private DateTime dateTime = new DateTime();
+	private DateTime dateTime = Utils.getFirstDateOfWeek(new DateTime());
 
 	JLabel lblDay1;
 	JLabel lblDay2;
@@ -208,7 +210,7 @@ public class TimesheetView extends JPanel {
 	public void populateTextField(Connection connection) throws SQLException, RDNE {
 		DbEngine db = new DbEngine();
 		HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db.getLoggedTimeByResource(connection,
-				Application.resource);
+				Application.resource, dateTime);
 
 		for (Row row : getRows()) {
 			List<DTOTime> times = null;
@@ -219,20 +221,20 @@ public class TimesheetView extends JPanel {
 				}
 			}
 			if (times == null) {
-				System.out.println("FAILZ");
 				times = new ArrayList<>();
 				// System.exit(0);
 			}
 
-			List<JTextField> txtRowDay = row.getTxtRowDay();
+			List<AJFormattedTextField> txtRowDay = row.getTxtRowDay();
 			DateTime firstDayOfWeek = row.getDates();
-			for (JTextField jTextField : txtRowDay) {
+			for (AJFormattedTextField jTextField : txtRowDay) {
 				for (DTOTime dtoTime : times) {
 					if (firstDayOfWeek.withTimeAtStartOfDay().equals(dtoTime.getDate().withTimeAtStartOfDay())) {
 						String valueOf = String.valueOf(dtoTime.getLogged());
 						if (valueOf == null || valueOf.equals(""))
 							valueOf = "0.0";
 						jTextField.setText(valueOf);
+						jTextField.setNotes(dtoTime.getNotes());
 					}
 				}
 				firstDayOfWeek = firstDayOfWeek.plusDays(1);
@@ -252,7 +254,7 @@ public class TimesheetView extends JPanel {
 		int y = 1;
 		for (DTOProjectTimeSheet dtoProjectTimeSheet : allProjectsTimeSheetForResource) {
 			int x = 2;
-			List<JTextField> txt = new ArrayList<>();
+			List<AJFormattedTextField> txt = new ArrayList<>();
 			for (int i = 0; i < 7; i++) {
 				NumberFormat format = NumberFormat.getInstance();
 				NumberFormatter formatter = new NumberFormatter(format);
@@ -260,7 +262,7 @@ public class TimesheetView extends JPanel {
 				formatter.setMaximum(24.0);
 				formatter.setCommitsOnValidEdit(true);
 				formatter.setValueClass(Double.class);
-				JFormattedTextField txtField = new JFormattedTextField(formatter);
+				AJFormattedTextField txtField = new AJFormattedTextField(formatter);
 				txtField.setSize(new Dimension(10, 25));
 				txtField.setPreferredSize(new Dimension(10, 25));
 				txtField.setSize(new Dimension(10, 25));
@@ -274,6 +276,7 @@ public class TimesheetView extends JPanel {
 				txtField.setText("0.0");
 				txtField.setValue(new Double(0.0));
 				txtField.addFocusListener(getFocus());
+				txtField.addKeyListener(getKeyListener());
 
 				txt.add(txtField);
 			}
@@ -365,6 +368,37 @@ public class TimesheetView extends JPanel {
 
 	}
 
+	private KeyListener getKeyListener() {
+		return new KeyListener() {
+
+			@Override
+			public void keyTyped(KeyEvent e) {
+			}
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				// java.awt.event.KeyEvent[KEY_RELEASED,keyCode=115,keyText=F4,keyChar=Undefined
+				// keyChar,keyLocation=KEY_LOCATION_STANDARD,rawCode=115,primaryLevelUnicode=0,scancode=62,extendedKeyCode=0x73]
+				// on ATextField [notes=null]
+				if (e.getKeyCode() == 115) {
+					// F4
+
+					AJFormattedTextField txt = (AJFormattedTextField) e.getComponent();
+					TextNotesFrame txtFrame = new TextNotesFrame(txt);
+					txtFrame.pack();
+					txtFrame.setVisible(true);
+					String notes = txtFrame.getNotes();
+					txt.setNotes(notes);
+				}
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+
+			}
+		};
+	}
+
 	private FocusListener getFocus() {
 		return new FocusListener() {
 
@@ -381,7 +415,7 @@ public class TimesheetView extends JPanel {
 
 	public void labelTextInit(DateTime dateTime) {
 		DateTime first = Utils.getFirstDateOfWeek(dateTime);
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM/yyyy");
+		DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE - dd");
 		for (Component component : getLables()) {
 			((JLabel) component).setText(fmt.print(first));
 			first = first.plusDays(1);

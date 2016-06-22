@@ -11,6 +11,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -39,6 +41,7 @@ import timesheet.utils.Utils;
 
 public class ReportView extends JPanel {
 	private static final long serialVersionUID = 1L;
+	private final static Logger LOGGER = Logger.getLogger(ReportView.class.getName());
 
 	JComboBox<DTOProject> cmbProjectList = new JComboBox<DTOProject>();
 	JComboBox<DTOResource> cmbUserList = new JComboBox<DTOResource>();
@@ -223,7 +226,7 @@ public class ReportView extends JPanel {
 				stringBuilder.append("\n");
 				textPane.setText(stringBuilder.toString());
 			} catch (SQLException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "", e);
 				JOptionPane.showConfirmDialog(null, "FAILED");
 			}
 		});

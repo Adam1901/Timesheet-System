@@ -12,9 +12,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Props {
-
+	private final static Logger LOGGER = Logger.getLogger(Props.class.getName());
 	private static final String CONFIG_PROPERTIES = "config.properties";
 	private static Properties prop = new Properties();
 
@@ -25,7 +27,7 @@ public class Props {
 			try {
 				Files.write(file, new ArrayList<String>(), Charset.forName("UTF-8"));
 			} catch (IOException e) {
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "", e);
 			}
 		}
 		try (InputStream input = new FileInputStream(CONFIG_PROPERTIES);) {
@@ -38,7 +40,7 @@ public class Props {
 			}
 
 		} catch (IOException io) {
-			io.printStackTrace();
+			LOGGER.log(Level.SEVERE, "", io);
 			throw new RuntimeException("value not set for key: " + propKey + " - value: " + propVal);
 		}
 	}
@@ -50,7 +52,7 @@ public class Props {
 			prop.load(input);
 			return prop.getProperty(propKey);
 		} catch (IOException ex) {
-			ex.printStackTrace();
+			LOGGER.log(Level.SEVERE, "", ex);
 			throw new RuntimeException("value not found for key: " + propKey);
 		}
 
@@ -67,7 +69,7 @@ public class Props {
 			}
 
 		} catch (IOException io) {
-			io.printStackTrace();
+			LOGGER.log(Level.SEVERE, "", io);
 			throw new RuntimeException("value not deleted for key: " + string);
 		}
 	}

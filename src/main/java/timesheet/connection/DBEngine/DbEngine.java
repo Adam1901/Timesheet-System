@@ -21,13 +21,18 @@ import timesheet.connection.ConnectionManager;
 public class DbEngine {
 	// Lazy day, todo refactor out
 
-	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(Connection connection, DTOResource res)
-			throws SQLException {
-		String sql = "SELECT date, timelogged, t.project_timesheet_id, resource_id, project_id FROM time t "
-				+ "join project_timesheet pt where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ?";
+	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(Connection connection, DTOResource res,
+			DateTime dateTime) throws SQLException {
+		String sql = "SELECT date, timelogged, t.project_timesheet_id, resource_id, project_id, t.notes FROM time t "
+				+ "join project_timesheet pt where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ? "
+				+ "AND t.date between ? AND ? ";
 		HashMap<DTOProjectTimeSheet, List<DTOTime>> ret = new HashMap<>();
 		try (PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setInt(1, res.getResourceId());
+			DateTime dateTime2 = dateTime;
+			ps.setDate(2, new Date(dateTime2.getMillis()));
+			dateTime2 = dateTime2.plusDays(7);
+			ps.setDate(3, new Date(dateTime2.getMillis()));
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
 					int i = 1;
@@ -36,9 +41,10 @@ public class DbEngine {
 					int ptid = rs.getInt(i++);
 					int rid = rs.getInt(i++);
 					int pid = rs.getInt(i++);
+					String notes = rs.getString(i++);
 
 					DTOProjectTimeSheet dtoPt = new DTOProjectTimeSheet(ptid, pid, rid);
-					DTOTime dtoTime = new DTOTime(new DateTime(date.getTime()), timeLogged, ptid);
+					DTOTime dtoTime = new DTOTime(new DateTime(date.getTime()), timeLogged, ptid, notes);
 
 					boolean containsKey = ret.containsKey(dtoPt);
 					if (containsKey) {
@@ -156,17 +162,19 @@ public class DbEngine {
 			DTOProjectTimeSheet projectTimesheet) throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(" INSERT INTO time ");
-		sb.append(" (date, timelogged, project_timesheet_id) ");
+		sb.append(" (date, timelogged, project_timesheet_id, notes) ");
 		sb.append(" VALUES ");
-		sb.append("   (?, ?, ?) ");
+		sb.append("       (?, ?, ?, ?) ");
 		sb.append(" ON DUPLICATE KEY UPDATE ");
-		sb.append("  timelogged     = VALUES(timelogged) ");
+		sb.append("  timelogged = VALUES(timelogged), ");
+		sb.append("  notes      = VALUES(notes) ");
 
 		for (DTOTime dtoTime : times) {
 			try (PreparedStatement ps = connection.prepareStatement(sb.toString());) {
 				ps.setDate(1, new Date(dtoTime.getDate().getMillis()));
 				ps.setDouble(2, dtoTime.getLogged());
 				ps.setInt(3, projectTimesheet.getProject_timesheet_id());
+				ps.setString(4, dtoTime.getNotes());
 				ps.executeUpdate();
 			}
 		}
@@ -222,4 +230,12 @@ public class DbEngine {
 			}
 		}
 	}
+
+	// Report SQL
+	// SELECT t.date, r.resource_name, p.project_name , sum(t.timelogged) from
+	// time t, resource r, project p, project_timesheet pt
+	// where pt.project_id = p.project_id and pt.resource_id = r.resource_id and
+	// pt.project_timesheet_id = t.project_timesheet_id group by resource_name,
+	// project_name;
+
 }

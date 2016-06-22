@@ -1,6 +1,7 @@
 package timesheet.panels;
 
 import java.awt.AWTException;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -15,15 +16,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 
 import org.joda.time.DateTime;
@@ -33,14 +36,17 @@ import timesheet.Props;
 import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOTime;
+import timesheet.components.AJFormattedTextField;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.utils.Utils;
 
 public class MainWindow extends JFrame {
+	private final static Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
+	private static JLabel lblNotify = new JLabel("Status: Loading");
 
 	/**
 	 * Create the frame.
@@ -50,7 +56,7 @@ public class MainWindow extends JFrame {
 	 */
 	public MainWindow() throws SQLException, RDNE {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
+		LOGGER.info("test");
 		setBounds(100, 100, 763, 537);
 		setSize(1090, 372);
 
@@ -65,15 +71,15 @@ public class MainWindow extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
-		gbc_tabbedPane.gridwidth = 6;
+		gbc_tabbedPane.gridwidth = 7;
 		gbc_tabbedPane.insets = new Insets(0, 0, 5, 5);
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 1;
@@ -96,36 +102,36 @@ public class MainWindow extends JFrame {
 		JButton btnSave = new JButton("Save");
 		btnSave.addActionListener(arg0 -> {
 			Date start = new Date();
-			System.out.println("StartSave");
+			LOGGER.info("StartSave");
 			try (Connection connection = ConnectionManager.getConnection();) {
 				for (Row row : timesheetView.getRows()) {
-					List<JTextField> txtRowDay = row.getTxtRowDay();
+					List<AJFormattedTextField> txtRowDay = row.getTxtRowDay();
 					DateTime date = row.getDates();
 
 					List<DTOTime> times = new ArrayList<>();
 
-					for (JTextField jTextField : txtRowDay) {
+					for (AJFormattedTextField jTextField : txtRowDay) {
 						String text = jTextField.getText();
 						if (Utils.isStringNullOrEmpty(text))
 							text = "0.0";
 						DTOTime time = new DTOTime(date, Double.valueOf(text),
-								row.getProjectTimesheet().getProject_timesheet_id());
+								row.getProjectTimesheet().getProject_timesheet_id(), jTextField.getNotes());
 						times.add(time);
 						date = date.plusDays(1);
 						try {
 							new DbEngine().saveTimes(connection, times, Application.resource,
 									row.getProjectTimesheet());
 						} catch (SQLException e) {
-							e.printStackTrace();
+							LOGGER.log(Level.SEVERE, "", e);
 						}
 					}
 				}
 				connection.commit();
 			} catch (SQLException e1) {
-				e1.printStackTrace();
+				LOGGER.log(Level.SEVERE, "", e1);
 			}
 			Date end = new Date();
-			System.out.println("EndSave " + (end.getTime() - start.getTime()));
+			LOGGER.info("EndSave " + (end.getTime() - start.getTime()));
 		});
 
 		JButton btnAddProject = new JButton("Add Project");
@@ -143,7 +149,6 @@ public class MainWindow extends JFrame {
 				DTOProject input = (DTOProject) JOptionPane.showInputDialog(null, "Choose one",
 						"Add a project you have worked on", JOptionPane.QUESTION_MESSAGE, null, projectArr,
 						projectArr[0]);
-				System.out.println(input);
 
 				if (input != null) {
 					dbEngine.addProjectTimeSheet(Application.resource.getResourceId(), input.getProjectId());
@@ -151,7 +156,7 @@ public class MainWindow extends JFrame {
 				}
 
 			} catch (SQLException | RDNE e1) {
-				e1.printStackTrace();
+				LOGGER.log(Level.SEVERE, "", e1);
 
 			}
 		});
@@ -164,7 +169,7 @@ public class MainWindow extends JFrame {
 				timesheetView.repopulateTextFields();
 				timesheetView.labelTextInit(plusDays);
 			} catch (SQLException | RDNE ee) {
-				ee.printStackTrace();
+				LOGGER.log(Level.SEVERE, "", ee);
 			}
 		});
 
@@ -177,12 +182,12 @@ public class MainWindow extends JFrame {
 		});
 		GridBagConstraints gbc_btnDebug = new GridBagConstraints();
 		gbc_btnDebug.insets = new Insets(0, 0, 5, 5);
-		gbc_btnDebug.gridx = 2;
+		gbc_btnDebug.gridx = 3;
 		gbc_btnDebug.gridy = 2;
 		contentPane.add(btnDebug, gbc_btnDebug);
 		GridBagConstraints gbc_btnMinusWeek = new GridBagConstraints();
 		gbc_btnMinusWeek.insets = new Insets(0, 0, 5, 5);
-		gbc_btnMinusWeek.gridx = 3;
+		gbc_btnMinusWeek.gridx = 4;
 		gbc_btnMinusWeek.gridy = 2;
 		contentPane.add(btnMinusWeek, gbc_btnMinusWeek);
 
@@ -194,26 +199,34 @@ public class MainWindow extends JFrame {
 				timesheetView.repopulateTextFields();
 				timesheetView.labelTextInit(plusDays);
 			} catch (SQLException | RDNE e) {
-				e.printStackTrace();
+				LOGGER.log(Level.SEVERE, "", e);
 			}
 		});
 		GridBagConstraints gbc_btnAddWeek = new GridBagConstraints();
 		gbc_btnAddWeek.insets = new Insets(0, 0, 5, 5);
-		gbc_btnAddWeek.gridx = 4;
+		gbc_btnAddWeek.gridx = 5;
 		gbc_btnAddWeek.gridy = 2;
 		contentPane.add(btnAddWeek, gbc_btnAddWeek);
 		GridBagConstraints gbc_btnAddProject = new GridBagConstraints();
 		gbc_btnAddProject.insets = new Insets(0, 0, 5, 5);
-		gbc_btnAddProject.gridx = 5;
+		gbc_btnAddProject.gridx = 6;
 		gbc_btnAddProject.gridy = 2;
 		contentPane.add(btnAddProject, gbc_btnAddProject);
 
 		GridBagConstraints gbc_btnsave = new GridBagConstraints();
 		gbc_btnsave.anchor = GridBagConstraints.EAST;
 		gbc_btnsave.insets = new Insets(0, 0, 5, 5);
-		gbc_btnsave.gridx = 6;
+		gbc_btnsave.gridx = 7;
 		gbc_btnsave.gridy = 2;
 		contentPane.add(btnSave, gbc_btnsave);
+
+		GridBagConstraints gbc_lblNotify = new GridBagConstraints();
+		gbc_lblNotify.anchor = GridBagConstraints.WEST;
+		gbc_lblNotify.gridwidth = 7;
+		gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNotify.gridx = 1;
+		gbc_lblNotify.gridy = 3;
+		contentPane.add(lblNotify, gbc_lblNotify);
 
 		setTitle("Hello " + Application.resource.getResourceName() + ", Welcome to timesheet!");
 	}
@@ -258,7 +271,7 @@ public class MainWindow extends JFrame {
 			SystemTray tray = SystemTray.getSystemTray();
 			tray.add(icon);
 		} catch (AWTException e1) {
-			e1.printStackTrace();
+			LOGGER.log(Level.SEVERE, "", e1);
 		}
 	}
 
@@ -270,5 +283,15 @@ public class MainWindow extends JFrame {
 		} else {
 			return null;
 		}
+	}
+
+	public static void sendNotification(String text) {
+		lblNotify.setText("Status: " + text);
+		lblNotify.setForeground(Color.WHITE);
+	}
+
+	public static void sendErrorNotification(String text) {
+		lblNotify.setText("Status: " + text);
+		lblNotify.setForeground(Color.RED);
 	}
 }

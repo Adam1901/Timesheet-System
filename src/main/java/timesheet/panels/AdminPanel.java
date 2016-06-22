@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -14,6 +16,7 @@ import javax.swing.JTextField;
 import timesheet.connection.DBEngine.DbEngine;
 
 public class AdminPanel extends JPanel {
+	private final static Logger LOGGER = Logger.getLogger(AdminPanel.class.getName());
 	private static final long serialVersionUID = 1L;
 	private JTextField textField;
 	private final JButton btnNewButton = new JButton("Add");
@@ -54,7 +57,7 @@ public class AdminPanel extends JPanel {
 					JOptionPane.showConfirmDialog(null, "FAILED");
 			} catch (SQLException e1) {
 				JOptionPane.showConfirmDialog(null, "FAILED\nPerhaps it already exists?");
-				e1.printStackTrace();
+				LOGGER.log(Level.SEVERE, "failed to add", e1);
 			}
 		});
 		add(btnNewButton, gbc_btnNewButton);
@@ -82,7 +85,7 @@ public class AdminPanel extends JPanel {
 				if (!new DbEngine().addResource(txtResource.getText()))
 					JOptionPane.showConfirmDialog(null, "FAILED");
 			} catch (SQLException e1) {
-				e1.printStackTrace();
+				LOGGER.log(Level.SEVERE, "", e1);
 			}
 		});
 		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();

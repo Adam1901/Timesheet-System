@@ -9,6 +9,7 @@ public class DTOTime implements Serializable {
 	DateTime date;
 	double logged;
 	int projectTimsheetId;
+	String notes;
 
 	public DTOTime() {
 	}
@@ -39,7 +40,8 @@ public class DTOTime implements Serializable {
 
 	@Override
 	public String toString() {
-		return "DTOTime [date=" + date + ", logged=" + logged + ", projectTimsheetId=" + projectTimsheetId + "]";
+		return "DTOTime [date=" + date + ", logged=" + logged + ", projectTimsheetId=" + projectTimsheetId + ", notes="
+				+ notes + "]";
 	}
 
 	@Override
@@ -50,6 +52,7 @@ public class DTOTime implements Serializable {
 		long temp;
 		temp = Double.doubleToLongBits(logged);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + ((notes == null) ? 0 : notes.hashCode());
 		result = prime * result + projectTimsheetId;
 		return result;
 	}
@@ -70,16 +73,30 @@ public class DTOTime implements Serializable {
 			return false;
 		if (Double.doubleToLongBits(logged) != Double.doubleToLongBits(other.logged))
 			return false;
+		if (notes == null) {
+			if (other.notes != null)
+				return false;
+		} else if (!notes.equals(other.notes))
+			return false;
 		if (projectTimsheetId != other.projectTimsheetId)
 			return false;
 		return true;
 	}
 
-	public DTOTime(DateTime date, double logged, int projectTimsheetId) {
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+
+	public DTOTime(DateTime date, double logged, int projectTimsheetId, String notes) {
 		super();
 		this.date = date;
 		this.logged = logged;
 		this.projectTimsheetId = projectTimsheetId;
+		this.notes = notes;
 	}
 
 }
