@@ -3,8 +3,6 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
@@ -18,6 +16,7 @@ import timesheet.fun.Achievement;
 
 public class AboutPanel extends JPanel {
 	int easter = 0;
+	boolean seen = false;
 
 	public AboutPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -54,13 +53,12 @@ public class AboutPanel extends JPanel {
 		add(lblIfTheyPresist, gbc_lblIfTheyPresist);
 
 		JButton btnDidYouWin = new JButton("Did you win?");
-		btnDidYouWin.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				try {
+		btnDidYouWin.addActionListener(e -> {
+			try {
+				if (!seen)
 					new Achievement().calculateAchievements();
-				} catch (SQLException ee) {
-				}
+				seen = true;
+			} catch (SQLException ee) {
 			}
 		});
 		GridBagConstraints gbc_btnDidYouWin = new GridBagConstraints();

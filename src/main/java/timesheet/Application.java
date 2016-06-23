@@ -11,6 +11,7 @@ import com.seaglasslookandfeel.SeaGlassLookAndFeel;
 import timesheet.DTO.DTOResource;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.panels.MainWindow;
+import timesheet.utils.Props;
 import timesheet.utils.Utils;
 
 public class Application {

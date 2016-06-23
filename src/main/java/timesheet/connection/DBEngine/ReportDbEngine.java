@@ -45,4 +45,41 @@ public class ReportDbEngine {
 		}
 		return String.valueOf(i);
 	}
+
+	public String runLargeReport() throws SQLException {
+		StringBuilder ret = new StringBuilder();
+		String sql = " SELECT r.resource_name,";
+		sql += "           p.project_name,";
+		sql += "           SUM(t.timelogged)";
+		sql += "      FROM time t,";
+		sql += "           resource r,";
+		sql += "           project p,";
+		sql += "           project_timesheet pt";
+		sql += "     WHERE pt.project_id = p.project_id";
+		sql += "       AND pt.resource_id = r.resource_id";
+		sql += "      AND pt.project_timesheet_id = t.project_timesheet_id";
+		sql += " GROUP BY resource_name,";
+		sql += "          project_name";
+
+		ret.append("Name, Project Name, Total time\n");
+		try (Connection connection = ConnectionManager.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql.toString());
+				ResultSet rs = ps.executeQuery()) {
+			while (rs.next()) {
+				ret.append(rs.getString(1) + ", ");
+				ret.append(rs.getString(2) + ", ");
+				ret.append(rs.getDouble(3) + "\n");
+			}
+		}
+
+		return ret.toString();
+	}
+
+	/*
+	 * SELECT r.resource_name, p.project_name, sum(t.timelogged) FROM time t,
+	 * resource r, project p, project_timesheet pt WHERE pt.project_id =
+	 * p.project_id AND pt.resource_id = r.resource_id AND
+	 * pt.project_timesheet_id = t.project_timesheet_id GROUP BY resource_name,
+	 * project_name;
+	 */
 }

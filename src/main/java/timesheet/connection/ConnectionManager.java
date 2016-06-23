@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 
-import timesheet.Props;
+import timesheet.utils.Props;
 
 public class ConnectionManager {
 	private static final BasicDataSource dataSource = new BasicDataSource();

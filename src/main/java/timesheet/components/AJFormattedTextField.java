@@ -6,6 +6,7 @@ import javax.swing.JFormattedTextField;
 
 public class AJFormattedTextField extends JFormattedTextField {
 	private static final long serialVersionUID = 1L;
+	String notes;
 
 	public AJFormattedTextField() {
 		super();
@@ -30,8 +31,6 @@ public class AJFormattedTextField extends JFormattedTextField {
 	public AJFormattedTextField(Object value) {
 		super(value);
 	}
-
-	String notes;
 
 	@Override
 	public String toString() {

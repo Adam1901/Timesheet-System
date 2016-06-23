@@ -4,3 +4,7 @@ config.properties
 connections.txt
 target
 testKeys
+*.csv
+.project
+*.classpath
+.project

@@ -3,6 +3,10 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -189,7 +193,7 @@ public class ReportView extends JPanel {
 		gbc_Date2.gridy = 3;
 		add(endDatePicker, gbc_Date2);
 
-		JButton btnRunReport = new JButton("Run Report");
+		JButton btnRunReport = new JButton("Run Report Using Settings above");
 		btnRunReport.addActionListener(arg0 -> {
 			ReportDbEngine db = new ReportDbEngine();
 			try {
@@ -232,11 +236,36 @@ public class ReportView extends JPanel {
 		});
 		GridBagConstraints gbc_btnRunReport = new GridBagConstraints();
 		gbc_btnRunReport.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnRunReport.gridwidth = 5;
+		gbc_btnRunReport.gridwidth = 3;
 		gbc_btnRunReport.insets = new Insets(0, 0, 5, 5);
 		gbc_btnRunReport.gridx = 1;
 		gbc_btnRunReport.gridy = 4;
 		add(btnRunReport, gbc_btnRunReport);
+
+		JButton btnNewButton = new JButton("Run whole report as CSV");
+		btnNewButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String format = new SimpleDateFormat("yyyyMMdd").format(new Date());
+				String filename = format + " - Timesheet report.csv";
+				try (PrintWriter out = new PrintWriter(filename)) {
+					String runLargeReport = new ReportDbEngine().runLargeReport();
+					out.println(runLargeReport);
+					MainWindow.sendNotification("File \"" + filename + "\" saved");
+				} catch (SQLException | FileNotFoundException e) {
+					LOGGER.severe("Failed to save file");
+				}
+			}
+		});
+
+		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
+		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnNewButton.gridwidth = 2;
+		gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
+		gbc_btnNewButton.gridx = 4;
+		gbc_btnNewButton.gridy = 4;
+
+		add(btnNewButton, gbc_btnNewButton);
 
 		JScrollPane scrollPane = new JScrollPane();
 		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);

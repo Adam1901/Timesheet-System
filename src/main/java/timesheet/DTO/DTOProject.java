@@ -3,9 +3,6 @@ package timesheet.DTO;
 import java.io.Serializable;
 
 public class DTOProject implements Serializable {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	int projectId;
 	String projectName;
@@ -60,7 +57,7 @@ public class DTOProject implements Serializable {
 		return true;
 	}
 
-	//HAK ALERT
+	// HAK ALERT
 	@Override
 	public String toString() {
 		return projectName;

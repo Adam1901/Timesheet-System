@@ -77,6 +77,33 @@ public class TimesheetView extends JPanel {
 		return lables;
 	}
 
+	public void repopulateTextFields() throws SQLException, RDNE {
+		for (Row row : rows) {
+			for (AJFormattedTextField ajFormattedTextField : row.getTxtRowDay()) {
+				ajFormattedTextField.setVisible(false);
+				ajFormattedTextField = null;
+			}
+		}
+		rows = new ArrayList<>();
+		for (JTextField jTextField : txtEndOfRows) {
+			jTextField.setVisible(false);
+			jTextField = null;
+		}
+		txtEndOfRows = new ArrayList<>();
+
+		lblColumnTotal.setText("");
+		lblColumnTotal = null;
+		remove(sep);
+		sep = null;
+		try (Connection connection = ConnectionManager.getConnection();) {
+			createTextFields(connection);
+			populateTextField(connection);
+		}
+		calculateTotals();
+		repaint();
+		validate();
+	}
+
 	/**
 	 * Create the panel.
 	 * 
@@ -121,21 +148,6 @@ public class TimesheetView extends JPanel {
 			}
 		}
 		return temp;
-	}
-
-	public void repopulateTextFields() throws SQLException, RDNE {
-		rows = new ArrayList<>();
-		lblColumnTotal.setText("");
-		lblColumnTotal = null;
-		remove(sep);
-		sep = null;
-		try (Connection connection = ConnectionManager.getConnection();) {
-			createTextFields(connection);
-			populateTextField(connection);
-		}
-		calculateTotals();
-		repaint();
-		validate();
 	}
 
 	public void populateTextField(Connection connection) throws SQLException, RDNE {
@@ -206,7 +218,7 @@ public class TimesheetView extends JPanel {
 				txtField.setColumns(10);
 				txtField.setText("0.0");
 				txtField.setValue(new Double(0.0));
-				txtField.addFocusListener(getFocus());
+				txtField.addFocusListener(getFocusListener());
 				txtField.addKeyListener(getKeyListener());
 
 				txt.add(txtField);
@@ -271,7 +283,6 @@ public class TimesheetView extends JPanel {
 			jTextField.setColumns(10);
 		}
 
-		txtTotTotal = new JTextField();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.gridx = x2++;
@@ -330,7 +341,7 @@ public class TimesheetView extends JPanel {
 		};
 	}
 
-	private FocusListener getFocus() {
+	private FocusListener getFocusListener() {
 		return new FocusListener() {
 
 			@Override
@@ -478,7 +489,12 @@ public class TimesheetView extends JPanel {
 			for (int k = 0; k < txtEndOfRows.size(); k++) {
 				JTextField jTextField = txtEndOfRows.get(k);
 				// TODO still a bug :( hmmm
-				jTextField.setText(String.valueOf(totalRowTime[k]));
+				try {
+					jTextField.setText(String.valueOf(totalRowTime[k]));
+				} catch (Exception e) {
+					// TODO: handle exception
+					e.printStackTrace();
+				}
 			}
 		}
 		{
@@ -512,7 +528,6 @@ public class TimesheetView extends JPanel {
 			} else if (tmp > Application.HOURS_IN_WEEK) {
 				txtTotTotal.setBackground(Color.GREEN);
 			}
-
 		}
 	}
 }

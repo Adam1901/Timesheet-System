@@ -19,7 +19,7 @@ import timesheet.DTO.DTOTime;
 import timesheet.connection.ConnectionManager;
 
 public class DbEngine {
-	// Lazy day, todo refactor out
+	// Lazy day, TODO refactor out
 
 	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(Connection connection, DTOResource res,
 			DateTime dateTime) throws SQLException {
@@ -189,7 +189,6 @@ public class DbEngine {
 
 	public boolean addResource(String text) throws SQLException {
 		String sql = "INSERT INTO resource (resource_name) VALUES (?)";
-
 		try (Connection connection = ConnectionManager.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setString(1, text);
@@ -202,12 +201,4 @@ public class DbEngine {
 			}
 		}
 	}
-
-	// Report SQL
-	// SELECT t.date, r.resource_name, p.project_name , sum(t.timelogged) from
-	// time t, resource r, project p, project_timesheet pt
-	// where pt.project_id = p.project_id and pt.resource_id = r.resource_id and
-	// pt.project_timesheet_id = t.project_timesheet_id group by resource_name,
-	// project_name;
-
 }

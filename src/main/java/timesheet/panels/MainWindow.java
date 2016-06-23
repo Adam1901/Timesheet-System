@@ -32,13 +32,13 @@ import javax.swing.border.EmptyBorder;
 import org.joda.time.DateTime;
 
 import timesheet.Application;
-import timesheet.Props;
 import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOTime;
 import timesheet.components.AJFormattedTextField;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
+import timesheet.utils.Props;
 import timesheet.utils.Utils;
 
 public class MainWindow extends JFrame {
