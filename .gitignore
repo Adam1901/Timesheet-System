@@ -6,5 +6,5 @@ target
 testKeys
 *.csv
 .project
-*.classpath
+.classpath
 .project

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import timesheet.connection.ConnectionManager;
+import timesheet.utils.Utils;
 
 public class ReportDbEngine {
 	public String runReport(ReportParameters report) throws SQLException {
@@ -39,36 +40,37 @@ public class ReportDbEngine {
 			}
 		}
 
-		int i = 0;
-		for (Double doublea : total) {
+		double i = 0.0;
+		for (double doublea : total) {
 			i += doublea;
 		}
-		return String.valueOf(i);
+		return Utils.doubleValueOf(i);
 	}
 
 	public String runLargeReport() throws SQLException {
 		StringBuilder ret = new StringBuilder();
-		String sql = " SELECT r.resource_name,";
-		sql += "           p.project_name,";
-		sql += "           SUM(t.timelogged)";
-		sql += "      FROM time t,";
-		sql += "           resource r,";
-		sql += "           project p,";
-		sql += "           project_timesheet pt";
-		sql += "     WHERE pt.project_id = p.project_id";
-		sql += "       AND pt.resource_id = r.resource_id";
-		sql += "      AND pt.project_timesheet_id = t.project_timesheet_id";
-		sql += " GROUP BY resource_name,";
-		sql += "          project_name";
+		String sql = " SELECT r.resource_name, ";
+		sql += "           p.project_name, ";
+		sql += "           ROUND(SUM(t.timelogged), 1) ";
+		sql += "      FROM time t, ";
+		sql += "           resource r, ";
+		sql += "           project p, ";
+		sql += "           project_timesheet pt ";
+		sql += "     WHERE pt.project_id = p.project_id ";
+		sql += "       AND pt.resource_id = r.resource_id ";
+		sql += "       AND pt.project_timesheet_id = t.project_timesheet_id ";
+		sql += " GROUP BY resource_name, ";
+		sql += "          project_name ";
 
-		ret.append("Name, Project Name, Total time\n");
+		ret.append("Name, Project Name, Total time").append(System.lineSeparator());
 		try (Connection connection = ConnectionManager.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql.toString());
 				ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
 				ret.append(rs.getString(1) + ", ");
 				ret.append(rs.getString(2) + ", ");
-				ret.append(rs.getDouble(3) + "\n");
+				double double1 = rs.getDouble(3);
+				ret.append(double1 + "\n");
 			}
 		}
 

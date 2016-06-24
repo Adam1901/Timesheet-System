@@ -72,9 +72,9 @@ public class MainWindow extends JFrame {
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
@@ -101,40 +101,7 @@ public class MainWindow extends JFrame {
 
 		JButton btnSave = new JButton("Save");
 		btnSave.addActionListener(arg0 -> {
-			Date start = new Date();
-			LOGGER.info("StartSave");
-			try (Connection connection = ConnectionManager.getConnection();) {
-				for (Row row : timesheetView.getRows()) {
-					List<AJFormattedTextField> txtRowDay = row.getTxtRowDay();
-					DateTime date = row.getDates();
-
-					List<DTOTime> times = new ArrayList<>();
-
-					for (AJFormattedTextField jTextField : txtRowDay) {
-						String text = jTextField.getText();
-						if (Utils.isStringNullOrEmpty(text))
-							text = "0.0";
-						DTOTime time = new DTOTime(date, Double.valueOf(text),
-								row.getProjectTimesheet().getProject_timesheet_id(), jTextField.getNotes());
-						times.add(time);
-						date = date.plusDays(1);
-						try {
-							new DbEngine().saveTimes(connection, times, Application.resource,
-									row.getProjectTimesheet());
-							sendNotification("Save success!");
-						} catch (SQLException e) {
-							LOGGER.log(Level.SEVERE, "", e);
-							sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
-						}
-					}
-				}
-				connection.commit();
-			} catch (SQLException e1) {
-				LOGGER.log(Level.SEVERE, "", e1);
-				sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
-			}
-			Date end = new Date();
-			LOGGER.info("EndSave " + (end.getTime() - start.getTime()));
+			saveTimeData(timesheetView);
 		});
 
 		JButton btnAddProject = new JButton("Add Project");
@@ -184,13 +151,21 @@ public class MainWindow extends JFrame {
 			Props.deleteProperty("password");
 			sendErrorNotification("LOGGED OUT");
 		});
+
+		GridBagConstraints gbc_lblNotify = new GridBagConstraints();
+		gbc_lblNotify.anchor = GridBagConstraints.WEST;
+		gbc_lblNotify.gridwidth = 7;
+		gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNotify.gridx = 1;
+		gbc_lblNotify.gridy = 2;
+		contentPane.add(lblNotify, gbc_lblNotify);
 		GridBagConstraints gbc_btnDebug = new GridBagConstraints();
-		gbc_btnDebug.insets = new Insets(0, 0, 5, 5);
+		gbc_btnDebug.insets = new Insets(0, 0, 0, 5);
 		gbc_btnDebug.gridx = 3;
 		gbc_btnDebug.gridy = 2;
 		contentPane.add(btnDebug, gbc_btnDebug);
 		GridBagConstraints gbc_btnMinusWeek = new GridBagConstraints();
-		gbc_btnMinusWeek.insets = new Insets(0, 0, 5, 5);
+		gbc_btnMinusWeek.insets = new Insets(0, 0, 0, 5);
 		gbc_btnMinusWeek.gridx = 4;
 		gbc_btnMinusWeek.gridy = 2;
 		contentPane.add(btnMinusWeek, gbc_btnMinusWeek);
@@ -207,32 +182,60 @@ public class MainWindow extends JFrame {
 			}
 		});
 		GridBagConstraints gbc_btnAddWeek = new GridBagConstraints();
-		gbc_btnAddWeek.insets = new Insets(0, 0, 5, 5);
+		gbc_btnAddWeek.insets = new Insets(0, 0, 0, 5);
 		gbc_btnAddWeek.gridx = 5;
 		gbc_btnAddWeek.gridy = 2;
 		contentPane.add(btnAddWeek, gbc_btnAddWeek);
 		GridBagConstraints gbc_btnAddProject = new GridBagConstraints();
-		gbc_btnAddProject.insets = new Insets(0, 0, 5, 5);
+		gbc_btnAddProject.insets = new Insets(0, 0, 0, 5);
 		gbc_btnAddProject.gridx = 6;
 		gbc_btnAddProject.gridy = 2;
 		contentPane.add(btnAddProject, gbc_btnAddProject);
 
 		GridBagConstraints gbc_btnsave = new GridBagConstraints();
 		gbc_btnsave.anchor = GridBagConstraints.EAST;
-		gbc_btnsave.insets = new Insets(0, 0, 5, 5);
+		gbc_btnsave.insets = new Insets(0, 0, 0, 5);
 		gbc_btnsave.gridx = 7;
 		gbc_btnsave.gridy = 2;
 		contentPane.add(btnSave, gbc_btnsave);
 
-		GridBagConstraints gbc_lblNotify = new GridBagConstraints();
-		gbc_lblNotify.anchor = GridBagConstraints.WEST;
-		gbc_lblNotify.gridwidth = 7;
-		gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
-		gbc_lblNotify.gridx = 1;
-		gbc_lblNotify.gridy = 3;
-		contentPane.add(lblNotify, gbc_lblNotify);
-
 		setTitle("Hello " + Application.resource.getResourceName() + ", Welcome to timesheet!");
+	}
+
+	private void saveTimeData(TimesheetView timesheetView) {
+		Date start = new Date();
+		LOGGER.info("StartSave");
+		try (Connection connection = ConnectionManager.getConnection();) {
+			for (Row row : timesheetView.getRows()) {
+				List<AJFormattedTextField> txtRowDay = row.getTxtRowDay();
+				DateTime date = row.getDates();
+
+				List<DTOTime> times = new ArrayList<>();
+
+				for (AJFormattedTextField jTextField : txtRowDay) {
+					String text = jTextField.getText();
+					if (Utils.isStringNullOrEmpty(text))
+						text = "0.0";
+					DTOTime time = new DTOTime(date, Double.valueOf(text),
+							row.getProjectTimesheet().getProject_timesheet_id(), jTextField.getNotes());
+					times.add(time);
+					date = date.plusDays(1);
+					try {
+						new DbEngine().saveTimes(connection, times, Application.resource, row.getProjectTimesheet());
+						sendNotification("Save successful!");
+					} catch (SQLException e) {
+						LOGGER.log(Level.SEVERE, "", e);
+						sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
+					}
+				}
+			}
+			connection.commit();
+		} catch (SQLException e1) {
+			LOGGER.log(Level.SEVERE, "", e1);
+			sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
+		}
+		Date end = new Date();
+		LOGGER.info("EndSave " + (end.getTime() - start.getTime()));
 	}
 
 	private void createImages() throws Exception {

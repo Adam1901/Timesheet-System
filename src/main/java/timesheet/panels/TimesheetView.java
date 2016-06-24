@@ -77,6 +77,25 @@ public class TimesheetView extends JPanel {
 		return lables;
 	}
 
+	/**
+	 * Create the panel.
+	 * 
+	 * @throws SQLException
+	 * @throws RDNE
+	 */
+	public TimesheetView() throws SQLException, RDNE {
+
+		jbInit();
+		labelTextInit(getDateTime());
+		try (Connection connection = ConnectionManager.getConnection();) {
+			createTextFields(connection);
+			populateTextField(connection);
+		}
+		calculateTotals();
+		repaint();
+		validate();
+	}
+
 	public void repopulateTextFields() throws SQLException, RDNE {
 		for (Row row : rows) {
 			for (AJFormattedTextField ajFormattedTextField : row.getTxtRowDay()) {
@@ -95,25 +114,6 @@ public class TimesheetView extends JPanel {
 		lblColumnTotal = null;
 		remove(sep);
 		sep = null;
-		try (Connection connection = ConnectionManager.getConnection();) {
-			createTextFields(connection);
-			populateTextField(connection);
-		}
-		calculateTotals();
-		repaint();
-		validate();
-	}
-
-	/**
-	 * Create the panel.
-	 * 
-	 * @throws SQLException
-	 * @throws RDNE
-	 */
-	public TimesheetView() throws SQLException, RDNE {
-
-		jbinit();
-		labelTextInit(getDateTime());
 		try (Connection connection = ConnectionManager.getConnection();) {
 			createTextFields(connection);
 			populateTextField(connection);
@@ -165,7 +165,6 @@ public class TimesheetView extends JPanel {
 			}
 			if (times == null) {
 				times = new ArrayList<>();
-				// System.exit(0);
 			}
 
 			List<AJFormattedTextField> txtRowDay = row.getTxtRowDay();
@@ -173,7 +172,7 @@ public class TimesheetView extends JPanel {
 			for (AJFormattedTextField jTextField : txtRowDay) {
 				for (DTOTime dtoTime : times) {
 					if (firstDayOfWeek.withTimeAtStartOfDay().equals(dtoTime.getDate().withTimeAtStartOfDay())) {
-						String valueOf = String.valueOf(dtoTime.getLogged());
+						String valueOf = Utils.doubleValueOf(dtoTime.getLogged());
 						if (valueOf == null || valueOf.equals(""))
 							valueOf = "0.0";
 						jTextField.setText(valueOf);
@@ -329,8 +328,6 @@ public class TimesheetView extends JPanel {
 					TextNotesFrame txtFrame = new TextNotesFrame(txt);
 					txtFrame.pack();
 					txtFrame.setVisible(true);
-					String notes = txtFrame.getNotes();
-					txt.setNotes(notes);
 				}
 			}
 
@@ -357,14 +354,14 @@ public class TimesheetView extends JPanel {
 
 	public void labelTextInit(DateTime dateTime) {
 		DateTime first = Utils.getFirstDateOfWeek(dateTime);
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("EEEE - dd");
+		DateTimeFormatter fmt = DateTimeFormat.forPattern("EEE - dd/MM");
 		for (Component component : getLables()) {
 			((JLabel) component).setText(fmt.print(first));
 			first = first.plusDays(1);
 		}
 	}
 
-	private void jbinit() {
+	private void jbInit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -490,7 +487,7 @@ public class TimesheetView extends JPanel {
 				JTextField jTextField = txtEndOfRows.get(k);
 				// TODO still a bug :( hmmm
 				try {
-					jTextField.setText(String.valueOf(totalRowTime[k]));
+					jTextField.setText(Utils.doubleValueOf(totalRowTime[k]));
 				} catch (Exception e) {
 					// TODO: handle exception
 					e.printStackTrace();
@@ -512,7 +509,13 @@ public class TimesheetView extends JPanel {
 				} else if (d > Application.HOURS_IN_DAY) {
 					totalBoxes[j].setBackground(Color.GREEN);
 				}
-				totalBoxes[j].setText(String.valueOf(d));
+				totalBoxes[j].setText(Utils.doubleValueOf(d));
+				if (d > 24.0) {
+					DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM");
+					MainWindow.sendErrorNotification("More than 24 hours logged in a day W/C " + fmt.print(dateTime)
+							+ ". Please check your input!");
+					totalBoxes[j].setBackground(Color.MAGENTA);
+				}
 			}
 
 			// Set colour the bottom right total
@@ -520,7 +523,7 @@ public class TimesheetView extends JPanel {
 			for (double d : totalTime) {
 				tmp += d;
 			}
-			txtTotTotal.setText(String.valueOf(tmp));
+			txtTotTotal.setText(Utils.doubleValueOf(tmp));
 			if (tmp < Application.HOURS_IN_WEEK) {
 				txtTotTotal.setBackground(Color.RED);
 			} else if (tmp == Application.HOURS_IN_WEEK) {
