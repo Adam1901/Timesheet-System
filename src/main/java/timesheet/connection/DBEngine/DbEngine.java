@@ -92,24 +92,24 @@ public class DbEngine {
 	public List<DTOResource> getAllResources(Connection connection) throws SQLException {
 		List<DTOResource> resources = new ArrayList<DTOResource>();
 
-		String sql = "SELECT resource_id, resource_name FROM resource";
+		String sql = "SELECT resource_id, resource_name, adminLevel FROM resource";
 		try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
-				resources.add(new DTOResource(rs.getInt(1), rs.getString(2)));
+				resources.add(new DTOResource(rs.getInt(1), rs.getString(2), rs.getInt(3)));
 			}
 		}
 		return resources;
 	}
 
 	public DTOResource getResource(String name) throws SQLException, RDNE {
-		String sql = "SELECT resource_id, resource_name FROM resource where resource_name = ?";
+		String sql = "SELECT resource_id, resource_name, adminLevel FROM resource where resource_name = ?";
 
 		try (Connection connection = ConnectionManager.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setString(1, name);
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
-					return new DTOResource(rs.getInt(1), rs.getString(2));
+					return new DTOResource(rs.getInt(1), rs.getString(2), rs.getInt(3));
 				}
 			}
 		}
@@ -187,11 +187,12 @@ public class DbEngine {
 		}
 	}
 
-	public boolean addResource(String text) throws SQLException {
-		String sql = "INSERT INTO resource (resource_name) VALUES (?)";
+	public boolean addResource(String text, int level) throws SQLException {
+		String sql = "INSERT INTO resource (resource_name adminLevel) VALUES (?, ?)";
 		try (Connection connection = ConnectionManager.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setString(1, text);
+			ps.setInt(2, level);
 			int executeUpdate = ps.executeUpdate();
 			if (executeUpdate == 1) {
 				connection.commit();

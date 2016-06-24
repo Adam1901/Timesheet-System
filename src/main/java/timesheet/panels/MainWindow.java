@@ -94,9 +94,8 @@ public class MainWindow extends JFrame {
 
 		tabbedPane.addTab("Timesheet", null, scrollFrame, null);
 		tabbedPane.addTab("Reports", null, new ReportView(), null);
-		// TODO implement
-		// if (Application.name.toLowerCase().equals("admin"))
-		tabbedPane.addTab("Admin", null, new AdminPanel(), null);
+		if (Application.resource.getAdminLevel() >= 2)
+			tabbedPane.addTab("Admin", null, new AdminPanel(), null);
 		tabbedPane.addTab("About", null, new AboutPanel(), null);
 
 		JButton btnSave = new JButton("Save");

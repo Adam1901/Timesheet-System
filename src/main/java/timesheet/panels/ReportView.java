@@ -3,8 +3,6 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -242,19 +240,18 @@ public class ReportView extends JPanel {
 		gbc_btnRunReport.gridy = 4;
 		add(btnRunReport, gbc_btnRunReport);
 
-		JButton btnNewButton = new JButton("Run whole report as CSV");
-		btnNewButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				String format = new SimpleDateFormat("yyyyMMdd").format(new Date());
-				String filename = format + " - Timesheet report.csv";
-				try (PrintWriter out = new PrintWriter(filename)) {
-					String runLargeReport = new ReportDbEngine().runLargeReport();
-					out.println(runLargeReport);
-					MainWindow.sendNotification("File \"" + filename + "\" saved");
-				} catch (SQLException | FileNotFoundException e) {
-					LOGGER.severe("Failed to save file");
-				}
+		JButton btnNewButton = new JButton("Run whole report as CSV for dates");
+		btnNewButton.setToolTipText("Runs the report for all users and gives you an overview breakdown. ");
+		btnNewButton.addActionListener(arg0 -> {
+			String format = new SimpleDateFormat("yyyyMMdd").format(new Date());
+			String filename = format + " - Timesheet report.csv";
+			try (PrintWriter out = new PrintWriter(filename)) {
+				String runLargeReport = new ReportDbEngine().runLargeReport(getDateTime(startDatePicker),
+						getDateTime(endDatePicker));
+				out.println(runLargeReport);
+				MainWindow.sendNotification("File \"" + filename + "\" saved");
+			} catch (SQLException | FileNotFoundException e) {
+				LOGGER.severe("Failed to save file");
 			}
 		});
 

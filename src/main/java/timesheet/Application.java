@@ -22,7 +22,6 @@ public class Application {
 
 	public static void main(String[] args)
 			throws ClassNotFoundException, SQLException, RDNE, UnsupportedLookAndFeelException {
-		Props.setProperty("test", "test");
 		UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
 		String propertyName = args.length == 0 ? Props.getProperty("username") : null;
 		String nameToUse = null;
@@ -37,11 +36,14 @@ public class Application {
 		} else {
 			System.exit(0);
 		}
-		Props.setProperty("username", name);
 
 		resource = new DbEngine().getResource(Application.name);
-		Props.setProperty("name", name);
-		Props.setProperty("resName", resource.getResourceName());
+		if (resource.getAdminLevel() == 0) {
+			JOptionPane.showConfirmDialog(null, "Account disabled");
+			System.exit(0);
+		}
+		Props.setProperty("username", name);
+		Props.setProperty("resID", String.valueOf(resource.getResourceId()));
 		MainWindow frame = new MainWindow();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
