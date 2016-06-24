@@ -46,15 +46,15 @@ public class Achievement {
 			HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db.getLoggedTimeByResource(connection,
 					Application.resource, null);
 			for (Entry<DTOProjectTimeSheet, List<DTOTime>> dtoTime : loggedTimeByResource.entrySet()) {
-				double timeInWeek = 0.0;
+				double timeInProj = 0.0;
 				for (DTOTime dtoTime2 : dtoTime.getValue()) {
-					timeInWeek += dtoTime2.getLogged();
+					timeInProj += dtoTime2.getLogged();
 				}
 
-				if (timeInWeek >= 100 && testBefore(_100HIP)) {
+				if (timeInProj >= 100 && testBefore(_100HIP)) {
 					Props.setProperty(_100HIP, "1");
 					showMessage("You have logged 100 hours against a project. Congratulations!");
-				} else if (timeInWeek >= 1000 && testBefore(_1000HIP)) {
+				} else if (timeInProj >= 1000 && testBefore(_1000HIP)) {
 					Props.setProperty(_1000HIP, "1");
 					showMessage(
 							"You have logged 1000 hours against a project. Go take a break and make a cup of tea ;)\nYou've earned it! ");
