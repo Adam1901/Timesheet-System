@@ -35,7 +35,7 @@ import timesheet.Application;
 import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOTime;
-import timesheet.components.AJFormattedTextField;
+import timesheet.components.JFormattedTextFieldWithNotes;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.utils.Props;
@@ -206,12 +206,12 @@ public class MainWindow extends JFrame {
 		LOGGER.info("StartSave");
 		try (Connection connection = ConnectionManager.getConnection();) {
 			for (Row row : timesheetView.getRows()) {
-				List<AJFormattedTextField> txtRowDay = row.getTxtRowDay();
+				List<JFormattedTextFieldWithNotes> txtRowDay = row.getTxtRowDay();
 				DateTime date = row.getDates();
 
 				List<DTOTime> times = new ArrayList<>();
 
-				for (AJFormattedTextField jTextField : txtRowDay) {
+				for (JFormattedTextFieldWithNotes jTextField : txtRowDay) {
 					String text = jTextField.getText();
 					if (Utils.isStringNullOrEmpty(text))
 						text = "0.0";
@@ -219,16 +219,17 @@ public class MainWindow extends JFrame {
 							row.getProjectTimesheet().getProject_timesheet_id(), jTextField.getNotes());
 					times.add(time);
 					date = date.plusDays(1);
-					try {
-						new DbEngine().saveTimes(connection, times, Application.resource, row.getProjectTimesheet());
-						sendNotification("Save successful!");
-					} catch (SQLException e) {
-						LOGGER.log(Level.SEVERE, "", e);
-						sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
-					}
+				}
+				// TODO perf
+				try {
+					new DbEngine().saveTimes(connection, times, Application.resource, row.getProjectTimesheet());
+				} catch (SQLException e) {
+					LOGGER.log(Level.SEVERE, "", e);
+					sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
 				}
 			}
 			connection.commit();
+			sendNotification("Save successful!");
 		} catch (SQLException e1) {
 			LOGGER.log(Level.SEVERE, "", e1);
 			sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");

@@ -7,15 +7,15 @@ import javax.swing.JLabel;
 import org.joda.time.DateTime;
 
 import timesheet.DTO.DTOProjectTimeSheet;
-import timesheet.components.AJFormattedTextField;
+import timesheet.components.JFormattedTextFieldWithNotes;
 
 public class Row {
 	private JLabel title;
-	private List<AJFormattedTextField> txtRowDay;
+	private List<JFormattedTextFieldWithNotes> txtRowDay;
 	private DTOProjectTimeSheet projectTimesheet;
 	private DateTime firstDateOfWeek;
 
-	public Row(JLabel title, List<AJFormattedTextField> txtRowDay, DTOProjectTimeSheet projectTimesheet,
+	public Row(JLabel title, List<JFormattedTextFieldWithNotes> txtRowDay, DTOProjectTimeSheet projectTimesheet,
 			DateTime firstDateOfWeek) {
 		super();
 		this.title = title;
@@ -81,11 +81,11 @@ public class Row {
 		this.title = title;
 	}
 
-	public List<AJFormattedTextField> getTxtRowDay() {
+	public List<JFormattedTextFieldWithNotes> getTxtRowDay() {
 		return txtRowDay;
 	}
 
-	public void setTxtRowDay(List<AJFormattedTextField> txtRowDay) {
+	public void setTxtRowDay(List<JFormattedTextFieldWithNotes> txtRowDay) {
 		this.txtRowDay = txtRowDay;
 	}
 

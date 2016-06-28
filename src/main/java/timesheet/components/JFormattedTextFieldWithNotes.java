@@ -4,31 +4,31 @@ import java.text.Format;
 
 import javax.swing.JFormattedTextField;
 
-public class AJFormattedTextField extends JFormattedTextField {
+public class JFormattedTextFieldWithNotes extends JFormattedTextField {
 	private static final long serialVersionUID = 1L;
 	String notes;
 
-	public AJFormattedTextField() {
+	public JFormattedTextFieldWithNotes() {
 		super();
 	}
 
-	public AJFormattedTextField(AbstractFormatter formatter) {
+	public JFormattedTextFieldWithNotes(AbstractFormatter formatter) {
 		super(formatter);
 	}
 
-	public AJFormattedTextField(AbstractFormatterFactory factory, Object currentValue) {
+	public JFormattedTextFieldWithNotes(AbstractFormatterFactory factory, Object currentValue) {
 		super(factory, currentValue);
 	}
 
-	public AJFormattedTextField(AbstractFormatterFactory factory) {
+	public JFormattedTextFieldWithNotes(AbstractFormatterFactory factory) {
 		super(factory);
 	}
 
-	public AJFormattedTextField(Format format) {
+	public JFormattedTextFieldWithNotes(Format format) {
 		super(format);
 	}
 
-	public AJFormattedTextField(Object value) {
+	public JFormattedTextFieldWithNotes(Object value) {
 		super(value);
 	}
 

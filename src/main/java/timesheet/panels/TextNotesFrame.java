@@ -12,13 +12,13 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import timesheet.components.AJFormattedTextField;
+import timesheet.components.JFormattedTextFieldWithNotes;
 
 public class TextNotesFrame extends JFrame {
 	private static final long serialVersionUID = 1L;
 	String notes;
 
-	public TextNotesFrame(AJFormattedTextField txt) {
+	public TextNotesFrame(JFormattedTextFieldWithNotes txt) {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };

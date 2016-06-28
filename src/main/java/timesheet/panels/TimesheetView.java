@@ -33,7 +33,7 @@ import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOProjectTimeSheet;
 import timesheet.DTO.DTOTime;
-import timesheet.components.AJFormattedTextField;
+import timesheet.components.JFormattedTextFieldWithNotes;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.utils.Utils;
@@ -98,7 +98,7 @@ public class TimesheetView extends JPanel {
 
 	public void repopulateTextFields() throws SQLException, RDNE {
 		for (Row row : rows) {
-			for (AJFormattedTextField ajFormattedTextField : row.getTxtRowDay()) {
+			for (JFormattedTextFieldWithNotes ajFormattedTextField : row.getTxtRowDay()) {
 				ajFormattedTextField.setVisible(false);
 				ajFormattedTextField = null;
 			}
@@ -167,9 +167,12 @@ public class TimesheetView extends JPanel {
 				times = new ArrayList<>();
 			}
 
-			List<AJFormattedTextField> txtRowDay = row.getTxtRowDay();
+			List<JFormattedTextFieldWithNotes> txtRowDay = row.getTxtRowDay();
 			DateTime firstDayOfWeek = row.getDates();
-			for (AJFormattedTextField jTextField : txtRowDay) {
+			for (JFormattedTextFieldWithNotes jFormattedTextFieldWithNotes : txtRowDay) {
+				jFormattedTextFieldWithNotes.setText("0.0");
+			}
+			for (JFormattedTextFieldWithNotes jTextField : txtRowDay) {
 				for (DTOTime dtoTime : times) {
 					if (firstDayOfWeek.withTimeAtStartOfDay().equals(dtoTime.getDate().withTimeAtStartOfDay())) {
 						String valueOf = Utils.doubleValueOf(dtoTime.getLogged());
@@ -196,7 +199,7 @@ public class TimesheetView extends JPanel {
 		int y = 1;
 		for (DTOProjectTimeSheet dtoProjectTimeSheet : allProjectsTimeSheetForResource) {
 			int x = 2;
-			List<AJFormattedTextField> txt = new ArrayList<>();
+			List<JFormattedTextFieldWithNotes> txt = new ArrayList<>();
 			for (int i = 0; i < 7; i++) {
 				NumberFormat format = NumberFormat.getInstance();
 				NumberFormatter formatter = new NumberFormatter(format);
@@ -204,7 +207,7 @@ public class TimesheetView extends JPanel {
 				formatter.setMaximum(24.0);
 				formatter.setCommitsOnValidEdit(true);
 				formatter.setValueClass(Double.class);
-				AJFormattedTextField txtField = new AJFormattedTextField(formatter);
+				JFormattedTextFieldWithNotes txtField = new JFormattedTextFieldWithNotes(formatter);
 				txtField.setSize(new Dimension(10, 25));
 				txtField.setPreferredSize(new Dimension(10, 25));
 				txtField.setSize(new Dimension(10, 25));
@@ -324,7 +327,7 @@ public class TimesheetView extends JPanel {
 				if (e.getKeyCode() == 115) {
 					// F4
 
-					AJFormattedTextField txt = (AJFormattedTextField) e.getComponent();
+					JFormattedTextFieldWithNotes txt = (JFormattedTextFieldWithNotes) e.getComponent();
 					TextNotesFrame txtFrame = new TextNotesFrame(txt);
 					txtFrame.pack();
 					txtFrame.setVisible(true);
