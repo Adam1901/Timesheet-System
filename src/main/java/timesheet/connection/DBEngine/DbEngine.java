@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 
 import org.joda.time.DateTime;
 
@@ -165,8 +166,8 @@ public class DbEngine {
 		}
 	}
 
-	public void saveTimes(Connection connection, List<DTOTime> times, DTOResource resource,
-			DTOProjectTimeSheet projectTimesheet) throws SQLException {
+	public void saveTimes(Connection connection, DTOResource resource, HashMap<DTOProjectTimeSheet, List<DTOTime>> ma)
+			throws SQLException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(" INSERT INTO time ");
 		sb.append(" (date, timelogged, project_timesheet_id, notes) ");
@@ -176,15 +177,19 @@ public class DbEngine {
 		sb.append("  timelogged = VALUES(timelogged), ");
 		sb.append("  notes      = VALUES(notes) ");
 
-		for (DTOTime dtoTime : times) {
-			try (PreparedStatement ps = connection.prepareStatement(sb.toString());) {
-				ps.setDate(1, new Date(dtoTime.getDate().getMillis()));
-				ps.setDouble(2, dtoTime.getLogged());
-				ps.setInt(3, projectTimesheet.getProject_timesheet_id());
-				ps.setString(4, dtoTime.getNotes());
-				ps.executeUpdate();
+		for (Entry<DTOProjectTimeSheet, List<DTOTime>> entry : ma.entrySet()) {
+			List<DTOTime> value = entry.getValue();
+			for (DTOTime dtoTime : value) {
+				try (PreparedStatement ps = connection.prepareStatement(sb.toString());) {
+					ps.setDate(1, new Date(dtoTime.getDate().getMillis()));
+					ps.setDouble(2, dtoTime.getLogged());
+					ps.setInt(3, entry.getKey().getProject_timesheet_id());
+					ps.setString(4, dtoTime.getNotes());
+					ps.executeUpdate();
+				}
 			}
 		}
+
 	}
 
 	public boolean addResource(String text, int level) throws SQLException {

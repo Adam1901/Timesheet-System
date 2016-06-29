@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,6 +35,7 @@ import org.joda.time.DateTime;
 import timesheet.Application;
 import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
+import timesheet.DTO.DTOProjectTimeSheet;
 import timesheet.DTO.DTOTime;
 import timesheet.components.JFormattedTextFieldWithNotes;
 import timesheet.connection.ConnectionManager;
@@ -204,6 +206,7 @@ public class MainWindow extends JFrame {
 	private void saveTimeData(TimesheetView timesheetView) {
 		Date start = new Date();
 		LOGGER.info("StartSave");
+		HashMap<DTOProjectTimeSheet, List<DTOTime>> ma = new HashMap<>();
 		try (Connection connection = ConnectionManager.getConnection();) {
 			for (Row row : timesheetView.getRows()) {
 				List<JFormattedTextFieldWithNotes> txtRowDay = row.getTxtRowDay();
@@ -220,14 +223,9 @@ public class MainWindow extends JFrame {
 					times.add(time);
 					date = date.plusDays(1);
 				}
-				// TODO perf
-				try {
-					new DbEngine().saveTimes(connection, times, Application.resource, row.getProjectTimesheet());
-				} catch (SQLException e) {
-					LOGGER.log(Level.SEVERE, "", e);
-					sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");
-				}
+				ma.put(row.getProjectTimesheet(), times);
 			}
+			new DbEngine().saveTimes(connection, Application.resource, ma);
 			connection.commit();
 			sendNotification("Save successful!");
 		} catch (SQLException e1) {
