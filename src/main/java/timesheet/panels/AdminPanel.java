@@ -122,8 +122,8 @@ public class AdminPanel extends JPanel {
 			}
 		});
 
-		lvlsUsers.addItem(new Levels(1, "User"));
-		lvlsUsers.addItem(new Levels(2, "Admin"));
+		lvlsUsers.addItem(new Levels(1, Levels.LEVEL_USER));
+		lvlsUsers.addItem(new Levels(2, Levels.LEVEL_ADMIN));
 		lvlsUsers.setSelectedIndex(0);
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
 		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
@@ -206,7 +206,7 @@ public class AdminPanel extends JPanel {
 	private void fillCmbBoxes() {
 		DbEngine db = new DbEngine();
 		try (Connection connection = ConnectionManager.getConnection();) {
-			List<DTOProject> allProject = db.getAllProject(connection);
+			List<DTOProject> allProject = db.getAllProjects(connection);
 			List<DTOResource> allResources = db.getAllResources(connection);
 			for (DTOResource dtoResource : allResources) {
 				cmbUsers.addItem(dtoResource);
@@ -220,6 +220,9 @@ public class AdminPanel extends JPanel {
 	}
 
 	private class Levels {
+		public static final String LEVEL_USER = "USER";
+		public static final String LEVEL_ADMIN = "ADMIN";
+
 		public Levels(int level, String levelS) {
 			this.level = level;
 			this.levelS = levelS;

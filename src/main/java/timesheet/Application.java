@@ -21,31 +21,52 @@ public class Application {
 	public static double HOURS_IN_WEEK = 37.5;
 
 	public static void main(String[] args)
-			throws ClassNotFoundException, SQLException, RDNE, UnsupportedLookAndFeelException {
+			throws ClassNotFoundException, SQLException, UnsupportedLookAndFeelException, RDNE {
 		UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
-		String propertyName = args.length == 0 ? Props.getProperty("username") : null;
+
+		String propertyName = Props.getProperty("username");
 		String nameToUse = null;
+		boolean useLoginForm = false;
 
 		if (Utils.isStringNullOrEmpty(propertyName)) {
-			nameToUse = JOptionPane.showInputDialog(null, "Please enter your name to log in.");
+			useLoginForm = true;
 		} else {
 			nameToUse = propertyName;
 		}
 		if (nameToUse != null) {
-			name = nameToUse;
+			Application.name = nameToUse;
 		} else {
-			System.exit(0);
+			useLoginForm = true;
 		}
 
-		resource = new DbEngine().getResource(Application.name);
-		if (resource.getAdminLevel() == 0) {
+		if (!useLoginForm) {
+			login();
+		} else {
+			LoginFrame lFrm = new LoginFrame(args);
+			lFrm.setVisible(true);
+			lFrm.setLocationRelativeTo(null);
+		}
+	}
+
+	public static void login() throws SQLException, RDNE {
+		try {
+			Application.resource = new DbEngine().getResource(Application.name);
+		} catch (RDNE e) {
+			// try again
+			Application.name = null;
+			Props.setProperty("username", "");
+			JOptionPane.showMessageDialog(null, "Login Failed", "Login Failed", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+		if (Application.resource.getAdminLevel() == 0) {
 			JOptionPane.showConfirmDialog(null, "Account disabled");
 			System.exit(0);
 		}
-		Props.setProperty("username", name);
-		Props.setProperty("resID", String.valueOf(resource.getResourceId()));
+		Props.setProperty("username", Application.name);
+		Props.setProperty("resID", String.valueOf(Application.resource.getResourceId()));
 		MainWindow frame = new MainWindow();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
+
 }

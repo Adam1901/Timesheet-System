@@ -102,11 +102,9 @@ public class DbEngine {
 		return resources;
 	}
 
-	public DTOResource getResource(String name) throws SQLException, RDNE {
+	public DTOResource getResource(Connection connection, String name) throws SQLException, RDNE {
 		String sql = "SELECT resource_id, resource_name, adminLevel FROM resource where resource_name = ?";
-
-		try (Connection connection = ConnectionManager.getConnection();
-				PreparedStatement ps = connection.prepareStatement(sql);) {
+		try (PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setString(1, name);
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
@@ -117,13 +115,19 @@ public class DbEngine {
 		throw new RDNE(name);
 	}
 
-	public List<DTOProject> getAllProject() throws SQLException {
+	public DTOResource getResource(String name) throws SQLException, RDNE {
 		try (Connection connection = ConnectionManager.getConnection();) {
-			return getAllProject(connection);
+			return getResource(connection, name);
 		}
 	}
 
-	public List<DTOProject> getAllProject(Connection connection) throws SQLException {
+	public List<DTOProject> getAllProjects() throws SQLException {
+		try (Connection connection = ConnectionManager.getConnection();) {
+			return getAllProjects(connection);
+		}
+	}
+
+	public List<DTOProject> getAllProjects(Connection connection) throws SQLException {
 		List<DTOProject> projects = new ArrayList<>();
 		String sql = "SELECT project_id, project_name FROM project";
 		try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
@@ -151,9 +155,14 @@ public class DbEngine {
 	}
 
 	public boolean addProjectTimeSheet(int resourceId, int projectId) throws SQLException {
-		String sql = "INSERT INTO project_timesheet (`resource_id`, `project_id`) VALUES (?, ?)";
-		try (Connection connection = ConnectionManager.getConnection();
-				PreparedStatement ps = connection.prepareStatement(sql);) {
+		try (Connection connection = ConnectionManager.getConnection();) {
+			return addProjectTimeSheet(connection, resourceId, projectId);
+		}
+	}
+
+	public boolean addProjectTimeSheet(Connection connection, int resourceId, int projectId) throws SQLException {
+		String sql = "INSERT INTO project_timesheet (resource_id, project_id) VALUES (?, ?)";
+		try (PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setInt(1, resourceId);
 			ps.setInt(2, projectId);
 			int executeUpdate = ps.executeUpdate();
@@ -193,18 +202,33 @@ public class DbEngine {
 	}
 
 	public boolean addResource(String text, int level) throws SQLException {
-		String sql = "INSERT INTO resource (resource_name adminLevel) VALUES (?, ?)";
-		try (Connection connection = ConnectionManager.getConnection();
-				PreparedStatement ps = connection.prepareStatement(sql);) {
-			ps.setString(1, text);
-			ps.setInt(2, level);
-			int executeUpdate = ps.executeUpdate();
-			if (executeUpdate == 1) {
-				connection.commit();
-				return true;
-			} else {
-				return false;
+		boolean b = false;
+		String sql = "INSERT INTO resource (resource_name, adminLevel) VALUES (?, ?)";
+		try (Connection connection = ConnectionManager.getConnection();) {
+			try (PreparedStatement ps = connection.prepareStatement(sql);) {
+				ps.setString(1, text);
+				ps.setInt(2, level);
+				int executeUpdate = ps.executeUpdate();
+				if (executeUpdate == 1) {
+					b = true;
+				}
 			}
+
+			if (b) {
+				// Adds initial project to user
+				DTOResource resource = getResource(connection, text);
+				for (DTOProject dtoProject : getAllProjects(connection)) {
+					if ("admin".equalsIgnoreCase(dtoProject.getProjectName())) {
+						addProjectTimeSheet(connection, resource.getResourceId(), dtoProject.getProjectId());
+					} else if ("holiday".equalsIgnoreCase(dtoProject.getProjectName())) {
+						addProjectTimeSheet(connection, resource.getResourceId(), dtoProject.getProjectId());
+					}
+				}
+				connection.commit();
+			}
+		} catch (RDNE e) {
+			e.printStackTrace();
 		}
+		return b;
 	}
 }

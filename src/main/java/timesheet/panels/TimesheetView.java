@@ -195,7 +195,7 @@ public class TimesheetView extends JPanel {
 				Application.resource);
 
 		// Perf fix
-		List<DTOProject> allProject = db.getAllProject(connection);
+		List<DTOProject> allProject = db.getAllProjects(connection);
 		int y = 1;
 		for (DTOProjectTimeSheet dtoProjectTimeSheet : allProjectsTimeSheetForResource) {
 			int x = 2;
@@ -488,11 +488,9 @@ public class TimesheetView extends JPanel {
 			}
 			for (int k = 0; k < txtEndOfRows.size(); k++) {
 				JTextField jTextField = txtEndOfRows.get(k);
-				// TODO still a bug :( hmmm
 				try {
 					jTextField.setText(Utils.doubleValueOf(totalRowTime[k]));
 				} catch (Exception e) {
-					// TODO: handle exception
 					e.printStackTrace();
 				}
 			}

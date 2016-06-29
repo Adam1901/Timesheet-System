@@ -110,7 +110,7 @@ public class MainWindow extends JFrame {
 
 			try {
 				DbEngine dbEngine = new DbEngine();
-				List<DTOProject> projectList = dbEngine.getAllProject();
+				List<DTOProject> projectList = dbEngine.getAllProjects();
 
 				Collections.sort(projectList, (v1, v2) -> v1.getProjectName().compareTo(v2.getProjectName()));
 
