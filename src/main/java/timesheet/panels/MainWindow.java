@@ -42,6 +42,8 @@ import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
 import timesheet.utils.Props;
 import timesheet.utils.Utils;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame {
 	private final static Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
@@ -73,15 +75,15 @@ public class MainWindow extends JFrame {
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
-		gbc_tabbedPane.gridwidth = 7;
+		gbc_tabbedPane.gridwidth = 8;
 		gbc_tabbedPane.insets = new Insets(0, 0, 5, 5);
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 1;
@@ -155,7 +157,7 @@ public class MainWindow extends JFrame {
 
 		GridBagConstraints gbc_lblNotify = new GridBagConstraints();
 		gbc_lblNotify.anchor = GridBagConstraints.WEST;
-		gbc_lblNotify.gridwidth = 7;
+		gbc_lblNotify.gridwidth = 8;
 		gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNotify.gridx = 1;
 		gbc_lblNotify.gridy = 2;
@@ -182,21 +184,38 @@ public class MainWindow extends JFrame {
 				LOGGER.log(Level.SEVERE, "", e);
 			}
 		});
+		
+		JButton btnToday = new JButton("Today");
+		btnToday.addActionListener(arg0 -> {
+			DateTime dt = new DateTime();
+			timesheetView.setDateTime(dt);
+			try {
+				timesheetView.repopulateTextFields();
+				timesheetView.labelTextInit(dt);
+			} catch (SQLException | RDNE e) {
+				LOGGER.log(Level.SEVERE, "", e);
+			}
+		});
+		GridBagConstraints gbc_btnToday = new GridBagConstraints();
+		gbc_btnToday.insets = new Insets(0, 0, 0, 5);
+		gbc_btnToday.gridx = 5;
+		gbc_btnToday.gridy = 2;
+		contentPane.add(btnToday, gbc_btnToday);
 		GridBagConstraints gbc_btnAddWeek = new GridBagConstraints();
 		gbc_btnAddWeek.insets = new Insets(0, 0, 0, 5);
-		gbc_btnAddWeek.gridx = 5;
+		gbc_btnAddWeek.gridx = 6;
 		gbc_btnAddWeek.gridy = 2;
 		contentPane.add(btnAddWeek, gbc_btnAddWeek);
 		GridBagConstraints gbc_btnAddProject = new GridBagConstraints();
 		gbc_btnAddProject.insets = new Insets(0, 0, 0, 5);
-		gbc_btnAddProject.gridx = 6;
+		gbc_btnAddProject.gridx = 7;
 		gbc_btnAddProject.gridy = 2;
 		contentPane.add(btnAddProject, gbc_btnAddProject);
 
 		GridBagConstraints gbc_btnsave = new GridBagConstraints();
 		gbc_btnsave.anchor = GridBagConstraints.EAST;
 		gbc_btnsave.insets = new Insets(0, 0, 0, 5);
-		gbc_btnsave.gridx = 7;
+		gbc_btnsave.gridx = 8;
 		gbc_btnsave.gridy = 2;
 		contentPane.add(btnSave, gbc_btnsave);
 

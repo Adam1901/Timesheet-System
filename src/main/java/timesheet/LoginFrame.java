@@ -58,7 +58,7 @@ public class LoginFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-					success(args);
+					login(args);
 				} catch (ClassNotFoundException | SQLException | UnsupportedLookAndFeelException | RDNE e1) {
 				}
 			}
@@ -71,7 +71,7 @@ public class LoginFrame extends JFrame {
 		contentPane.add(btnLogin, gbc_btnNewButton);
 	}
 
-	private void success(String[] args)
+	private void login(String[] args)
 			throws SQLException, ClassNotFoundException, UnsupportedLookAndFeelException, RDNE {
 
 		Application.name = txtUserName.getText();
