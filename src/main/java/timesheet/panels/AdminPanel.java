@@ -220,8 +220,8 @@ public class AdminPanel extends JPanel {
 	}
 
 	private class Levels {
-		public static final String LEVEL_USER = "USER";
-		public static final String LEVEL_ADMIN = "ADMIN";
+		public static final String LEVEL_USER = "User";
+		public static final String LEVEL_ADMIN = "Admin";
 
 		public Levels(int level, String levelS) {
 			this.level = level;
