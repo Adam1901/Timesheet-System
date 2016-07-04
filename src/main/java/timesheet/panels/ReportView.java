@@ -115,14 +115,14 @@ public class ReportView extends JPanel {
 		p.put("text.month", "Month");
 		p.put("text.year", "Year");
 		DateTime date = Utils.getFirstDateOfWeek(new DateTime());
-		JDatePanelImpl datePanel = new JDatePanelImpl(createDateModel(date), p);
+		JDatePanelImpl datePanel = new JDatePanelImpl(Utils.createDateModel(date), p);
 
 		Properties p1 = new Properties();
 		p1.put("text.today1", "Today");
 		p1.put("text.month1", "Month");
 		p1.put("text.year1", "Year");
 		date = date.plusDays(6);
-		JDatePanelImpl datePanel2 = new JDatePanelImpl(createDateModel(date), p);
+		JDatePanelImpl datePanel2 = new JDatePanelImpl(Utils.createDateModel(date), p);
 
 		JLabel lblProject = new JLabel("Project:");
 		GridBagConstraints gbc_lblProject = new GridBagConstraints();
@@ -165,7 +165,7 @@ public class ReportView extends JPanel {
 		gbc_lblNewLabel_1.gridy = 3;
 		add(lblNewLabel_1, gbc_lblNewLabel_1);
 		// Don't know about the formatter, but there it is...
-		JDatePickerImpl startDatePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+		JDatePickerImpl startDatePicker = new JDatePickerImpl(datePanel, new Utils().new DateLabelFormatter());
 
 		GridBagConstraints gbc_Date1 = new GridBagConstraints();
 		gbc_Date1.fill = GridBagConstraints.HORIZONTAL;
@@ -183,7 +183,7 @@ public class ReportView extends JPanel {
 		gbc_lblEndDate.gridy = 3;
 		add(lblEndDate, gbc_lblEndDate);
 
-		JDatePickerImpl endDatePicker = new JDatePickerImpl(datePanel2, new DateLabelFormatter());
+		JDatePickerImpl endDatePicker = new JDatePickerImpl(datePanel2, new Utils().new DateLabelFormatter());
 		GridBagConstraints gbc_Date2 = new GridBagConstraints();
 		gbc_Date2.insets = new Insets(0, 0, 5, 5);
 		gbc_Date2.fill = GridBagConstraints.HORIZONTAL;
@@ -209,8 +209,8 @@ public class ReportView extends JPanel {
 					report.setResource((DTOResource) cmbUserList.getSelectedItem());
 				}
 
-				report.setEnd(getDateTime(endDatePicker));
-				report.setStart(getDateTime(startDatePicker));
+				report.setEnd(Utils.getDateTime(endDatePicker));
+				report.setStart(Utils.getDateTime(startDatePicker));
 				String runReport = db.runReport(report);
 				System.out.println(runReport);
 
@@ -246,8 +246,8 @@ public class ReportView extends JPanel {
 			String format = new SimpleDateFormat("yyyyMMdd").format(new Date());
 			String filename = format + " - Timesheet report.csv";
 			try (PrintWriter out = new PrintWriter(filename)) {
-				String runLargeReport = new ReportDbEngine().runLargeReport(getDateTime(startDatePicker),
-						getDateTime(endDatePicker));
+				String runLargeReport = new ReportDbEngine().runLargeReport(Utils.getDateTime(startDatePicker),
+						Utils.getDateTime(endDatePicker));
 				out.println(runLargeReport);
 				MainWindow.sendNotification("File \"" + filename + "\" saved");
 			} catch (SQLException | FileNotFoundException e) {
@@ -279,41 +279,5 @@ public class ReportView extends JPanel {
 		textPane.setEditable(false);
 	}
 
-	private UtilDateModel createDateModel(DateTime date) {
-		UtilDateModel utilDateModel = new UtilDateModel();
-		int year = date.getYear();
-		int monthOfYear = date.getMonthOfYear() - 1; // Stupid java 0 based
-														// month /facepalm
-		int dayOfMonth = date.getDayOfMonth();
-		utilDateModel.setDate(year, monthOfYear, dayOfMonth);
-		utilDateModel.setSelected(true);
-		return utilDateModel;
-	}
-
-	private DateTime getDateTime(JDatePickerImpl date) {
-		Date value = (Date) date.getModel().getValue();
-		return new DateTime(value.getTime());
-	}
-
-	public class DateLabelFormatter extends AbstractFormatter {
-		private static final long serialVersionUID = 1L;
-		private String datePattern = "dd/MM/yyyy";
-		private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
-
-		@Override
-		public Object stringToValue(String text) throws ParseException {
-			return dateFormatter.parseObject(text);
-		}
-
-		@Override
-		public String valueToString(Object value) throws ParseException {
-			if (value != null) {
-				Calendar cal = (Calendar) value;
-				return dateFormatter.format(cal.getTime());
-			}
-
-			return "";
-		}
-
-	}
+	
 }
