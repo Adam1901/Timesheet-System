@@ -2,6 +2,7 @@ package timesheet.connection;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.apache.commons.dbcp2.BasicDataSource;
@@ -29,12 +30,11 @@ public class ConnectionManager {
 	}
 
 	public static Connection getConnection() throws SQLException {
-		System.out.print("start ");
+		LOGGER.log(Level.INFO, "start ");
 		Connection connection = dataSource.getConnection();
 		connectionCount++;
 		connection.setAutoCommit(false);
-		System.out.println(connectionCount + " - end");
+		LOGGER.log(Level.INFO, connectionCount + " - end");
 		return connection;
 	}
-
 }

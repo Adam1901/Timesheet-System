@@ -55,6 +55,15 @@ public class AboutPanel extends JPanel {
 		gbc_lblIfTheyPresist.gridy = 2;
 		add(lblIfTheyPresist, gbc_lblIfTheyPresist);
 
+		JButton btnLogout = new JButton("Logout");
+		btnLogout.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				Props.deleteProperty("username");
+				Props.deleteProperty("password");
+			}
+		});
+
 		JButton btnDidYouWin = new JButton("Did you win?");
 		btnDidYouWin.addActionListener(e -> {
 			try {
@@ -64,27 +73,18 @@ public class AboutPanel extends JPanel {
 			} catch (SQLException ee) {
 			}
 		});
-
-		JButton btnLogout = new JButton("Logout");
-		btnLogout.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				Props.deleteProperty("username");
-				Props.deleteProperty("password");
-			}
-		});
-		GridBagConstraints gbc_btnLogout = new GridBagConstraints();
-		gbc_btnLogout.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnLogout.insets = new Insets(0, 0, 5, 5);
-		gbc_btnLogout.gridx = 2;
-		gbc_btnLogout.gridy = 5;
-		add(btnLogout, gbc_btnLogout);
 		GridBagConstraints gbc_btnDidYouWin = new GridBagConstraints();
 		gbc_btnDidYouWin.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnDidYouWin.insets = new Insets(0, 0, 5, 5);
 		gbc_btnDidYouWin.gridx = 2;
-		gbc_btnDidYouWin.gridy = 6;
+		gbc_btnDidYouWin.gridy = 5;
 		add(btnDidYouWin, gbc_btnDidYouWin);
+		GridBagConstraints gbc_btnLogout = new GridBagConstraints();
+		gbc_btnLogout.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnLogout.insets = new Insets(0, 0, 5, 5);
+		gbc_btnLogout.gridx = 2;
+		gbc_btnLogout.gridy = 6;
+		add(btnLogout, gbc_btnLogout);
 
 		JLabel lblNewLabel = new JLabel("Made by Adam Meadows of Qmatic UK");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
