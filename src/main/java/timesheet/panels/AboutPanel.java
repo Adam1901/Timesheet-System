@@ -3,6 +3,8 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.SQLException;
@@ -14,9 +16,6 @@ import javax.swing.JPanel;
 
 import timesheet.fun.Achievement;
 import timesheet.utils.Props;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class AboutPanel extends JPanel {
 	int easter = 0;
@@ -65,15 +64,17 @@ public class AboutPanel extends JPanel {
 			} catch (SQLException ee) {
 			}
 		});
-		
+
 		JButton btnLogout = new JButton("Logout");
 		btnLogout.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				Props.deleteProperty("username");
 				Props.deleteProperty("password");
 			}
 		});
 		GridBagConstraints gbc_btnLogout = new GridBagConstraints();
+		gbc_btnLogout.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnLogout.insets = new Insets(0, 0, 5, 5);
 		gbc_btnLogout.gridx = 2;
 		gbc_btnLogout.gridy = 5;

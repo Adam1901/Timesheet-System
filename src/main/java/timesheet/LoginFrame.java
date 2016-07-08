@@ -60,6 +60,7 @@ public class LoginFrame extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					login(args);
+					setVisible(false);
 				} catch (ClassNotFoundException | SQLException | UnsupportedLookAndFeelException | RDNE e1) {
 				}
 			}

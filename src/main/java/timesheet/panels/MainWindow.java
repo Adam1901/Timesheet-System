@@ -10,6 +10,8 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -36,8 +38,6 @@ import org.jdatepicker.impl.JDatePickerImpl;
 import org.jdatepicker.impl.UtilDateModel;
 import org.joda.time.DateTime;
 
-import com.mysql.jdbc.Util;
-
 import timesheet.Application;
 import timesheet.RDNE;
 import timesheet.DTO.DTOProject;
@@ -46,12 +46,7 @@ import timesheet.DTO.DTOTime;
 import timesheet.components.JFormattedTextFieldWithNotes;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
-import timesheet.utils.Props;
 import timesheet.utils.Utils;
-import timesheet.utils.Utils.DateLabelFormatter;
-
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 
 public class MainWindow extends JFrame {
 	private final static Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
@@ -82,14 +77,15 @@ public class MainWindow extends JFrame {
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-			
+
 		GridBagLayout gbl_contentPane = new GridBagLayout();
 		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
-		
+
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
 		gbc_tabbedPane.gridwidth = 9;
@@ -104,7 +100,7 @@ public class MainWindow extends JFrame {
 		scrollFrame.setPreferredSize(timesheetView.getPreferredSize());
 		scrollFrame.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollFrame.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
+
 		Properties p = new Properties();
 		p.put("text.today", "Today");
 		p.put("text.month", "Month");
@@ -113,23 +109,15 @@ public class MainWindow extends JFrame {
 		UtilDateModel createDateModel = Utils.createDateModel(date);
 		JDatePanelImpl datePanel = new JDatePanelImpl(createDateModel, p);
 		datePanel.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				DateTime dt = new DateTime(createDateModel.getValue().getTime());
 				dt = Utils.getFirstDateOfWeek(dt);
-				timesheetView.setDateTime(dt);
-				try {
-					timesheetView.repopulateTextFields();
-					timesheetView.labelTextInit(dt);
-					setDate(dt, createDateModel);
-				} catch (SQLException | RDNE ee) {
-					LOGGER.log(Level.SEVERE, "", ee);
-				}
+				setDate(dt, timesheetView, createDateModel);
 			}
 		});
-		
-		
+
 		tabbedPane.addTab("Timesheet", null, scrollFrame, null);
 		tabbedPane.addTab("Reports", null, new ReportView(), null);
 		if (Application.resource.getAdminLevel() >= 2)
@@ -171,16 +159,9 @@ public class MainWindow extends JFrame {
 		JButton btnMinusWeek = new JButton("-1 Week");
 		btnMinusWeek.addActionListener(e -> {
 			DateTime plusDays = timesheetView.getDateTime().plusDays(-7);
-			timesheetView.setDateTime(plusDays);
-			try {
-				timesheetView.repopulateTextFields();
-				timesheetView.labelTextInit(plusDays);
-				setDate(plusDays, createDateModel);
-			} catch (SQLException | RDNE ee) {
-				LOGGER.log(Level.SEVERE, "", ee);
-			}
+			setDate(plusDays, timesheetView, createDateModel);
 		});
-		
+
 		JLabel lblDate = new JLabel("Date:");
 		GridBagConstraints gbc_lblDate = new GridBagConstraints();
 		gbc_lblDate.insets = new Insets(0, 0, 5, 5);
@@ -188,7 +169,7 @@ public class MainWindow extends JFrame {
 		gbc_lblDate.gridy = 2;
 		contentPane.add(lblDate, gbc_lblDate);
 		JDatePickerImpl startDatePicker = new JDatePickerImpl(datePanel, new Utils().new DateLabelFormatter());
-		
+
 		GridBagConstraints gbc_datePanel = new GridBagConstraints();
 		gbc_datePanel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_datePanel.gridwidth = 2;
@@ -205,27 +186,12 @@ public class MainWindow extends JFrame {
 		JButton btnAddWeek = new JButton("+1 Week");
 		btnAddWeek.addActionListener(arg0 -> {
 			DateTime plusDays = timesheetView.getDateTime().plusDays(7);
-			timesheetView.setDateTime(plusDays);
-			try {
-				timesheetView.repopulateTextFields();
-				timesheetView.labelTextInit(plusDays);
-				setDate(plusDays, createDateModel);
-			} catch (SQLException | RDNE e) {
-				LOGGER.log(Level.SEVERE, "", e);
-			}
+			setDate(plusDays, timesheetView, createDateModel);
 		});
-		
+
 		JButton btnToday = new JButton("Today");
 		btnToday.addActionListener(arg0 -> {
-			DateTime dt = new DateTime();
-			timesheetView.setDateTime(dt);
-			try {
-				timesheetView.repopulateTextFields();
-				timesheetView.labelTextInit(dt);
-				setDate(dt, createDateModel);
-			} catch (SQLException | RDNE e) {
-				LOGGER.log(Level.SEVERE, "", e);
-			}
+			setDate(Utils.getFirstDateOfWeek(new DateTime()), timesheetView, createDateModel);
 		});
 		GridBagConstraints gbc_btnToday = new GridBagConstraints();
 		gbc_btnToday.insets = new Insets(0, 0, 5, 5);
@@ -249,16 +215,27 @@ public class MainWindow extends JFrame {
 		gbc_btnsave.gridx = 9;
 		gbc_btnsave.gridy = 2;
 		contentPane.add(btnSave, gbc_btnsave);
-		
-				GridBagConstraints gbc_lblNotify = new GridBagConstraints();
-				gbc_lblNotify.gridwidth = 7;
-				gbc_lblNotify.anchor = GridBagConstraints.WEST;
-				gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
-				gbc_lblNotify.gridx = 1;
-				gbc_lblNotify.gridy = 3;
-				contentPane.add(lblNotify, gbc_lblNotify);
-		
+
+		GridBagConstraints gbc_lblNotify = new GridBagConstraints();
+		gbc_lblNotify.gridwidth = 7;
+		gbc_lblNotify.anchor = GridBagConstraints.WEST;
+		gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
+		gbc_lblNotify.gridx = 1;
+		gbc_lblNotify.gridy = 3;
+		contentPane.add(lblNotify, gbc_lblNotify);
+
 		setTitle("Hello " + Application.resource.getResourceName() + ", Welcome to timesheet!");
+	}
+
+	private void setDate(DateTime dt, TimesheetView timesheetView, UtilDateModel createDateModel) {
+		timesheetView.setDateTime(dt);
+		try {
+			timesheetView.repopulateTextFields();
+			timesheetView.labelTextInit(dt);
+			setDate(dt, createDateModel);
+		} catch (SQLException | RDNE e) {
+			LOGGER.log(Level.SEVERE, "", e);
+		}
 	}
 
 	private void saveTimeData(TimesheetView timesheetView) {
@@ -357,8 +334,8 @@ public class MainWindow extends JFrame {
 		lblNotify.setText("Status: " + text);
 		lblNotify.setForeground(Color.RED);
 	}
-	
-	private void setDate(DateTime dt, UtilDateModel mod){
-		mod.setDate(dt.getYear(), dt.getMonthOfYear()-1, dt.getDayOfMonth());
+
+	private void setDate(DateTime dt, UtilDateModel mod) {
+		mod.setDate(dt.getYear(), dt.getMonthOfYear() - 1, dt.getDayOfMonth());
 	}
 }

@@ -102,7 +102,11 @@ public class TimesheetView extends JPanel {
 				ajFormattedTextField.setVisible(false);
 				ajFormattedTextField = null;
 			}
+			JLabel title = row.getTitle();
+			title.setVisible(false);
+			title = null;
 		}
+
 		rows = new ArrayList<>();
 		for (JTextField jTextField : txtEndOfRows) {
 			jTextField.setVisible(false);
