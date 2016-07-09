@@ -99,8 +99,8 @@ public class MainWindow extends JFrame {
 		contentPane.add(tabbedPane, gbc_tabbedPane);
 
 		TimesheetView timesheetView = new TimesheetView();
-		JScrollPane scrollFrame = new JScrollPane(timesheetView);
-		scrollFrame.setPreferredSize(timesheetView.getPreferredSize());
+		JScrollPane scrollFrame = new JScrollPane(timesheetView.getPanel());
+		scrollFrame.setPreferredSize(timesheetView.getPanel().getPreferredSize());
 		scrollFrame.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollFrame.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
