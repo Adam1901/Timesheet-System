@@ -397,11 +397,10 @@ public class TimesheetView {
 
 	private void jbInit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 20 };
+		gridBagLayout.columnWidths = new int[] { 10, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 20 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE,
 				1.0 };
-		// HACK ALERT!
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0 };
 		pan.setLayout(gridBagLayout);
 
@@ -487,13 +486,12 @@ public class TimesheetView {
 		scrollPane.setViewportView(timeview);
 
 		GridBagLayout gbl_timeview = new GridBagLayout();
-		gbl_timeview.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 0 };
-		gbl_timeview.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0 };
+		gbl_timeview.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 };
+		gbl_timeview.rowHeights = new int[] { 0, 0, 0 };
 		gbl_timeview.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 				Double.MIN_VALUE };
-		gbl_timeview.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gbl_timeview.rowWeights = new double[] { 0.0, 1.0, 0.0 };
+
 		timeview.setLayout(gbl_timeview);
 
 		// HACK ALERT
