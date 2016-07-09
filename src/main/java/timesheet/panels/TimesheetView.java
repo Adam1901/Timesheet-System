@@ -25,6 +25,7 @@ import java.util.Map.Entry;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.text.NumberFormatter;
@@ -75,6 +76,9 @@ public class TimesheetView {
 
 	List<JTextField> txtEndOfRows = new ArrayList<>();
 	private JLabel lblRowTotal;
+	private JPanel timeview;
+	private JLabel lblNewLabel;
+	private JScrollPane scrollPane;
 
 	public JPanel getPanel() {
 		return pan;
@@ -248,10 +252,18 @@ public class TimesheetView {
 					int idi = Integer.valueOf(id);
 					if (idi == ts.getProjectId()) {
 						iterator.remove();
+						MainWindow.sendNotification("Projects hidden from view.");
 					}
 				}
 			}
 		}
+		// TODO
+		// This however causes a problem meaning it wont be counted in the
+		// totals.
+		// Work around: still add it to the stuff below but do some funky logic
+		// not to show it. That will hurt your brain though.
+		// OTHER workaround is chaning the calc total to look at DB. Will be
+		// slow though :(
 
 		// Perf fix
 		List<DTOProject> allProject = db.getAllProjects(connection);
@@ -273,7 +285,7 @@ public class TimesheetView {
 				gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 				gbc_textField.gridx = x++;
 				gbc_textField.gridy = y;
-				pan.add(txtField, gbc_textField);
+				timeview.add(txtField, gbc_textField);
 				txtField.setColumns(2);
 				txtField.setText("0.0");
 				txtField.setValue(new Double(0.0));
@@ -295,7 +307,7 @@ public class TimesheetView {
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textField.gridx = x;
 			gbc_textField.gridy = y;
-			pan.add(txtEndOfRowTotal, gbc_textField);
+			timeview.add(txtEndOfRowTotal, gbc_textField);
 			txtEndOfRowTotal.setColumns(2);
 			txtEndOfRowTotal.setText("0.0");
 			txtEndOfRowTotal.setEditable(false);
@@ -308,6 +320,8 @@ public class TimesheetView {
 				}
 			}
 			JButton hide = new JButton("Hide");
+			hide.setToolTipText(
+					"NOTE: Hiding a row will mean the time in the row is not counted in the UI. Reporting will be unaffected.");
 			String projectName = project.getProjectName();
 			if (!projectName.equalsIgnoreCase("admin") && !projectName.equalsIgnoreCase("holiday")) {
 				GridBagConstraints gbc_hideTbn = new GridBagConstraints();
@@ -316,7 +330,7 @@ public class TimesheetView {
 				gbc_hideTbn.gridx = ++x;
 				gbc_hideTbn.gridy = y;
 				hide.addActionListener(hideBtnActionListener(dtoProjectTimeSheet));
-				pan.add(hide, gbc_hideTbn);
+				timeview.add(hide, gbc_hideTbn);
 			}
 
 			JLabel lblProject = new JLabel(projectName);
@@ -325,7 +339,7 @@ public class TimesheetView {
 			gbc_lblProject.anchor = GridBagConstraints.EAST;
 			gbc_lblProject.gridx = 1;
 			gbc_lblProject.gridy = y;
-			pan.add(lblProject, gbc_lblProject);
+			timeview.add(lblProject, gbc_lblProject);
 
 			y++;
 
@@ -335,11 +349,11 @@ public class TimesheetView {
 		// Create separator
 		sep = new JSeparator(JSeparator.HORIZONTAL);
 		GridBagConstraints gbc_Sep = new GridBagConstraints();
+		gbc_Sep.insets = new Insets(0, 0, 0, 5);
 		gbc_Sep.anchor = GridBagConstraints.EAST;
-		gbc_Sep.insets = new Insets(0, 0, 5, 0);
 		gbc_Sep.gridx = 1;
 		gbc_Sep.gridwidth = 9;
-		gbc_Sep.gridy = y++;
+		gbc_Sep.gridy = 2;
 		pan.add(sep, gbc_Sep);
 
 		// Create total rows
@@ -349,16 +363,16 @@ public class TimesheetView {
 			gbc_textField.insets = new Insets(0, 0, 5, 5);
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textField.gridx = x2++;
-			gbc_textField.gridy = y;
+			gbc_textField.gridy = 2;
 			pan.add(jTextField, gbc_textField);
 			jTextField.setEditable(false);
 			jTextField.setColumns(2);
 		}
 
 		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.insets = new Insets(0, 0, 5, 5);
+		gbc_textField.insets = new Insets(0, 0, 0, 5);
 		gbc_textField.gridx = x2++;
-		gbc_textField.gridy = y;
+		gbc_textField.gridy = 2;
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		pan.add(txtTotTotal, gbc_textField);
 		txtTotTotal.setEditable(false);
@@ -367,7 +381,7 @@ public class TimesheetView {
 		lblRowTotal = new JLabel("Total");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 9;
 		gbc_lblNewLabel.gridy = 0;
 		pan.add(lblRowTotal, gbc_lblNewLabel);
@@ -375,23 +389,20 @@ public class TimesheetView {
 		lblColumnTotal = new JLabel("Total");
 		GridBagConstraints gbg = new GridBagConstraints();
 		gbg.anchor = GridBagConstraints.EAST;
-		gbg.insets = new Insets(0, 0, 5, 5);
+		gbg.insets = new Insets(0, 0, 0, 5);
 		gbg.gridx = 1;
-		gbg.gridy = y;
+		gbg.gridy = 2;
 		pan.add(lblColumnTotal, gbg);
 	}
 
 	private void jbInit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-				Double.MIN_VALUE };
+		gridBagLayout.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 20 };
+		gridBagLayout.rowHeights = new int[] { 0, 0, 0 };
+		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE,
+				1.0 };
 		// HACK ALERT!
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-				Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0 };
 		pan.setLayout(gridBagLayout);
 
 		lblDay1 = new JLabel();
@@ -462,6 +473,39 @@ public class TimesheetView {
 		txtTot7 = new JTextField();
 		txtTotTotal = new JTextField(2);
 		txtTotTotal.setName("test");
+
+		scrollPane = new JScrollPane();
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridwidth = 12;
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane.gridx = 0;
+		gbc_scrollPane.gridy = 1;
+		pan.add(scrollPane, gbc_scrollPane);
+
+		timeview = new JPanel();
+		scrollPane.setViewportView(timeview);
+
+		GridBagLayout gbl_timeview = new GridBagLayout();
+		gbl_timeview.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 0 };
+		gbl_timeview.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0 };
+		gbl_timeview.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+				Double.MIN_VALUE };
+		gbl_timeview.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		timeview.setLayout(gbl_timeview);
+
+		// HACK ALERT
+		lblNewLabel = new JLabel("hidden. used as workaround :P");
+		GridBagConstraints gbc_lblNewLabel2 = new GridBagConstraints();
+		gbc_lblNewLabel2.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblNewLabel2.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel2.gridx = 0;
+		gbc_lblNewLabel2.gridy = 0;
+		lblNewLabel.setVisible(false);
+		timeview.add(lblNewLabel, gbc_lblNewLabel2);
+		lblNewLabel = null;
 
 		MainWindow.sendNotification("You can press F4 to add a note to logged time!");
 	}

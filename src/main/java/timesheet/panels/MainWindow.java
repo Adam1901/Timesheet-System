@@ -31,7 +31,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.border.EmptyBorder;
 
@@ -99,10 +98,6 @@ public class MainWindow extends JFrame {
 		contentPane.add(tabbedPane, gbc_tabbedPane);
 
 		TimesheetView timesheetView = new TimesheetView();
-		JScrollPane scrollFrame = new JScrollPane(timesheetView.getPanel());
-		scrollFrame.setPreferredSize(timesheetView.getPanel().getPreferredSize());
-		scrollFrame.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-		scrollFrame.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		Properties p = new Properties();
 		p.put("text.today", "Today");
@@ -121,7 +116,7 @@ public class MainWindow extends JFrame {
 			}
 		});
 
-		tabbedPane.addTab("Timesheet", null, scrollFrame, null);
+		tabbedPane.addTab("Timesheet", null, timesheetView.getPanel(), null);
 		tabbedPane.addTab("Reports", null, new ReportView(), null);
 		if (Application.resource.getAdminLevel() >= 2)
 			tabbedPane.addTab("Admin", null, new AdminPanel(), null);
@@ -132,7 +127,8 @@ public class MainWindow extends JFrame {
 			saveTimeData(timesheetView);
 		});
 
-		JButton btnAddProject = new JButton("Add Project");
+		JButton btnAddProject = new JButton("Add or Show Project");
+		btnAddProject.setToolTipText("Click to add a new project to your timesheet or show an existing one.");
 		btnAddProject.addActionListener(e -> {
 
 			try {
