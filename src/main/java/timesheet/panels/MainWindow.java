@@ -12,6 +12,8 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -56,6 +58,7 @@ public class MainWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private static JLabel lblNotify = new JLabel("Status: Loading");
+	public static boolean madeChanges = false;
 
 	/**
 	 * Create the frame.
@@ -64,7 +67,7 @@ public class MainWindow extends JFrame {
 	 * @throws RDNE
 	 */
 	public MainWindow() throws SQLException, RDNE {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		LOGGER.info("test");
 		setBounds(100, 100, 763, 537);
 		setSize(1090, 372);
@@ -155,6 +158,9 @@ public class MainWindow extends JFrame {
 								// Remove from prop
 								iterator.remove();
 								Props.setProperty(TimesheetView.HIDE_PROPERTY, String.join(",", list));
+								if (list.size() == 1) {
+									Props.setProperty(TimesheetView.HIDE_PROPERTY, id + ",");
+								}
 								timesheetView.repopulateTextFields();
 								return;
 							}
@@ -233,6 +239,22 @@ public class MainWindow extends JFrame {
 		contentPane.add(lblNotify, gbc_lblNotify);
 
 		setTitle("Hello " + Application.resource.getResourceName() + ", Welcome to timesheet!");
+		madeChanges = false;
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent we) {
+				if (madeChanges) {
+					int dialogResult = JOptionPane.showConfirmDialog(null,
+							"You have unsaved changes! Do you want to quit without saving?", "Warning",
+							JOptionPane.WARNING_MESSAGE);
+					if (dialogResult == JOptionPane.YES_OPTION) {
+						System.exit(0);
+					}
+				} else {
+					System.exit(0);
+				}
+			}
+		});
 	}
 
 	private void setDate(DateTime dt, TimesheetView timesheetView, UtilDateModel createDateModel) {
@@ -271,6 +293,7 @@ public class MainWindow extends JFrame {
 			new DbEngine().saveTimes(connection, Application.resource, ma);
 			connection.commit();
 			sendNotification("Save successful!");
+			madeChanges = false;
 		} catch (SQLException e1) {
 			LOGGER.log(Level.SEVERE, "", e1);
 			sendErrorNotification("Could not save your time sheet. Please try again. Sorry :(");

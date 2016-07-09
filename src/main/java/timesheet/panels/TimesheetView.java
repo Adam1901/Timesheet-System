@@ -49,8 +49,6 @@ public class TimesheetView {
 	private JPanel pan = new JPanel();
 	public static final String HIDE_PROPERTY = "hide";
 
-	private static final long serialVersionUID = 1L;
-
 	private List<Row> rows = new ArrayList<>();
 
 	private DateTime dateTime = Utils.getFirstDateOfWeek(new DateTime());
@@ -380,7 +378,6 @@ public class TimesheetView {
 
 		lblRowTotal = new JLabel("Total");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 9;
 		gbc_lblNewLabel.gridy = 0;
@@ -397,10 +394,9 @@ public class TimesheetView {
 
 	private void jbInit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 10, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 20 };
+		gridBagLayout.columnWidths = new int[] { 10, 25, 25, 25, 25, 25, 25, 25, 25, 25, 50, 20 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, Double.MIN_VALUE,
-				1.0 };
+		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4.9E-324, 1.0 };
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, 0.0 };
 		pan.setLayout(gridBagLayout);
 
@@ -447,7 +443,6 @@ public class TimesheetView {
 
 		lblDay6 = new JLabel(".");
 		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
-		gbc_lblNewLabel_5.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblNewLabel_5.anchor = GridBagConstraints.NORTH;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_5.gridx = 7;
@@ -456,7 +451,6 @@ public class TimesheetView {
 
 		lblDay7 = new JLabel(".");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
-		gbc_lblNewLabel_6.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblNewLabel_6.anchor = GridBagConstraints.NORTH;
 		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_6.gridx = 8;
@@ -487,10 +481,13 @@ public class TimesheetView {
 
 		GridBagLayout gbl_timeview = new GridBagLayout();
 		gbl_timeview.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 };
-		gbl_timeview.rowHeights = new int[] { 0, 0, 0 };
+		gbl_timeview.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_timeview.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 				Double.MIN_VALUE };
-		gbl_timeview.rowWeights = new double[] { 0.0, 1.0, 0.0 };
+		gbl_timeview.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+				0.0, 0.0, 0.0, 0.0, 0.0 };
 
 		timeview.setLayout(gbl_timeview);
 
@@ -511,6 +508,9 @@ public class TimesheetView {
 	private void calculateTotals() {
 		if (!validateInput())
 			return;
+
+		double oldTotal = Double
+				.valueOf(txtTotTotal.getText() != null && !txtTotTotal.equals("") ? "0.0" : txtTotTotal.getText());
 
 		List<Row> rows2 = getRows();
 		if (rows2.isEmpty())
@@ -582,6 +582,11 @@ public class TimesheetView {
 			} else if (tmp > Application.HOURS_IN_WEEK) {
 				txtTotTotal.setBackground(Color.GREEN);
 			}
+		}
+
+		double newTotal = Double.valueOf(txtTotTotal.getText());
+		if (newTotal != oldTotal) {
+			MainWindow.madeChanges = true;
 		}
 	}
 
