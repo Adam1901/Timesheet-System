@@ -15,9 +15,11 @@ import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -46,6 +48,7 @@ import timesheet.DTO.DTOTime;
 import timesheet.components.JFormattedTextFieldWithNotes;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
+import timesheet.utils.Props;
 import timesheet.utils.Utils;
 
 public class MainWindow extends JFrame {
@@ -79,16 +82,16 @@ public class MainWindow extends JFrame {
 		setContentPane(contentPane);
 
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 0, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_contentPane.columnWidths = new int[] { 0, 0, 100, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				Double.MIN_VALUE };
 		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		contentPane.setLayout(gbl_contentPane);
 
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
-		gbc_tabbedPane.gridwidth = 9;
+		gbc_tabbedPane.gridwidth = 10;
 		gbc_tabbedPane.insets = new Insets(0, 0, 5, 5);
 		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
 		gbc_tabbedPane.gridx = 1;
@@ -146,6 +149,22 @@ public class MainWindow extends JFrame {
 						projectArr[0]);
 
 				if (input != null) {
+					String property = Props.getProperty(TimesheetView.HIDE_PROPERTY);
+					if (property != null && property.contains(",")) {
+						List<String> list = new ArrayList<>(Arrays.asList(property.split(",")));
+						for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
+							String string = iterator.next();
+							int id = Integer.valueOf(string);
+							if (id == input.getProjectId()) {
+								// Remove from prop
+								iterator.remove();
+								Props.setProperty(TimesheetView.HIDE_PROPERTY, String.join(",", list));
+								timesheetView.repopulateTextFields();
+								return;
+							}
+						}
+					}
+
 					dbEngine.addProjectTimeSheet(Application.resource.getResourceId(), input.getProjectId());
 					timesheetView.repopulateTextFields();
 				}
@@ -161,25 +180,18 @@ public class MainWindow extends JFrame {
 			DateTime plusDays = timesheetView.getDateTime().plusDays(-7);
 			setDate(plusDays, timesheetView, createDateModel);
 		});
-
-		JLabel lblDate = new JLabel("Date:");
-		GridBagConstraints gbc_lblDate = new GridBagConstraints();
-		gbc_lblDate.insets = new Insets(0, 0, 5, 5);
-		gbc_lblDate.gridx = 2;
-		gbc_lblDate.gridy = 2;
-		contentPane.add(lblDate, gbc_lblDate);
 		JDatePickerImpl startDatePicker = new JDatePickerImpl(datePanel, new Utils().new DateLabelFormatter());
 
 		GridBagConstraints gbc_datePanel = new GridBagConstraints();
 		gbc_datePanel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_datePanel.gridwidth = 2;
+		gbc_datePanel.gridwidth = 4;
 		gbc_datePanel.insets = new Insets(0, 0, 5, 5);
-		gbc_datePanel.gridx = 3;
+		gbc_datePanel.gridx = 2;
 		gbc_datePanel.gridy = 2;
 		contentPane.add(startDatePicker, gbc_datePanel);
 		GridBagConstraints gbc_btnMinusWeek = new GridBagConstraints();
 		gbc_btnMinusWeek.insets = new Insets(0, 0, 5, 5);
-		gbc_btnMinusWeek.gridx = 5;
+		gbc_btnMinusWeek.gridx = 6;
 		gbc_btnMinusWeek.gridy = 2;
 		contentPane.add(btnMinusWeek, gbc_btnMinusWeek);
 
@@ -195,29 +207,29 @@ public class MainWindow extends JFrame {
 		});
 		GridBagConstraints gbc_btnToday = new GridBagConstraints();
 		gbc_btnToday.insets = new Insets(0, 0, 5, 5);
-		gbc_btnToday.gridx = 6;
+		gbc_btnToday.gridx = 7;
 		gbc_btnToday.gridy = 2;
 		contentPane.add(btnToday, gbc_btnToday);
 		GridBagConstraints gbc_btnAddWeek = new GridBagConstraints();
 		gbc_btnAddWeek.insets = new Insets(0, 0, 5, 5);
-		gbc_btnAddWeek.gridx = 7;
+		gbc_btnAddWeek.gridx = 8;
 		gbc_btnAddWeek.gridy = 2;
 		contentPane.add(btnAddWeek, gbc_btnAddWeek);
 		GridBagConstraints gbc_btnAddProject = new GridBagConstraints();
 		gbc_btnAddProject.insets = new Insets(0, 0, 5, 5);
-		gbc_btnAddProject.gridx = 8;
+		gbc_btnAddProject.gridx = 9;
 		gbc_btnAddProject.gridy = 2;
 		contentPane.add(btnAddProject, gbc_btnAddProject);
 
 		GridBagConstraints gbc_btnsave = new GridBagConstraints();
 		gbc_btnsave.anchor = GridBagConstraints.EAST;
 		gbc_btnsave.insets = new Insets(0, 0, 5, 5);
-		gbc_btnsave.gridx = 9;
+		gbc_btnsave.gridx = 10;
 		gbc_btnsave.gridy = 2;
 		contentPane.add(btnSave, gbc_btnsave);
 
 		GridBagConstraints gbc_lblNotify = new GridBagConstraints();
-		gbc_lblNotify.gridwidth = 7;
+		gbc_lblNotify.gridwidth = 8;
 		gbc_lblNotify.anchor = GridBagConstraints.WEST;
 		gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNotify.gridx = 1;
@@ -245,7 +257,7 @@ public class MainWindow extends JFrame {
 		try (Connection connection = ConnectionManager.getConnection();) {
 			for (Row row : timesheetView.getRows()) {
 				List<JFormattedTextFieldWithNotes> txtRowDay = row.getTxtRowDay();
-				DateTime date = row.getDates();
+				DateTime date = row.getDate();
 
 				List<DTOTime> times = new ArrayList<>();
 

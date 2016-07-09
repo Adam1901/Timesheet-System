@@ -2,22 +2,27 @@ package timesheet.panels;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -36,9 +41,12 @@ import timesheet.DTO.DTOTime;
 import timesheet.components.JFormattedTextFieldWithNotes;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
+import timesheet.utils.Props;
 import timesheet.utils.Utils;
 
 public class TimesheetView extends JPanel {
+	public static final String HIDE_PROPERTY = "hide";
+
 	private static final long serialVersionUID = 1L;
 
 	private List<Row> rows = new ArrayList<>();
@@ -94,6 +102,18 @@ public class TimesheetView extends JPanel {
 		calculateTotals();
 		repaint();
 		validate();
+
+		for (Component component2 : getComponents()) {
+			if (component2 instanceof JTextField) {
+				component2.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						System.out.println(e);
+						System.out.println(e.getComponent().getName());
+					}
+				});
+			}
+		}
 	}
 
 	public void repopulateTextFields() throws SQLException, RDNE {
@@ -105,6 +125,10 @@ public class TimesheetView extends JPanel {
 			JLabel title = row.getTitle();
 			title.setVisible(false);
 			title = null;
+
+			JButton hideBtn = row.getHideBtn();
+			hideBtn.setVisible(false);
+			hideBtn = null;
 		}
 
 		rows = new ArrayList<>();
@@ -134,7 +158,9 @@ public class TimesheetView extends JPanel {
 					Double.valueOf(jTextField.getText());
 					jTextField.setBackground(Color.WHITE);
 				} catch (NumberFormatException e) {
-					jTextField.setBackground(Color.RED);
+					String text = jTextField.getText();
+					if (text != null && !"".equals(text))
+						jTextField.setBackground(Color.RED);
 					return false;
 				}
 			}
@@ -172,7 +198,7 @@ public class TimesheetView extends JPanel {
 			}
 
 			List<JFormattedTextFieldWithNotes> txtRowDay = row.getTxtRowDay();
-			DateTime firstDayOfWeek = row.getDates();
+			DateTime firstDayOfWeek = row.getDate();
 			for (JFormattedTextFieldWithNotes jFormattedTextFieldWithNotes : txtRowDay) {
 				jFormattedTextFieldWithNotes.setText("0.0");
 			}
@@ -198,6 +224,22 @@ public class TimesheetView extends JPanel {
 		List<DTOProjectTimeSheet> allProjectsTimeSheetForResource = db.getAllProjectsTimeSheetForResource(connection,
 				Application.resource);
 
+		// Don't load the ones that are ignored
+		String property = Props.getProperty(HIDE_PROPERTY);
+		if (property != null && !"".equalsIgnoreCase(property)) {
+			List<String> hidden = new ArrayList<String>(Arrays.asList(property.split(",")));
+			for (Iterator<DTOProjectTimeSheet> iterator = allProjectsTimeSheetForResource.iterator(); iterator
+					.hasNext();) {
+				DTOProjectTimeSheet ts = iterator.next();
+				for (String id : hidden) {
+					int idi = Integer.valueOf(id);
+					if (idi == ts.getProjectId()) {
+						iterator.remove();
+					}
+				}
+			}
+		}
+
 		// Perf fix
 		List<DTOProject> allProject = db.getAllProjects(connection);
 		int y = 1;
@@ -212,35 +254,36 @@ public class TimesheetView extends JPanel {
 				formatter.setCommitsOnValidEdit(true);
 				formatter.setValueClass(Double.class);
 				JFormattedTextFieldWithNotes txtField = new JFormattedTextFieldWithNotes(formatter);
-				txtField.setSize(new Dimension(10, 25));
-				txtField.setPreferredSize(new Dimension(10, 25));
-				txtField.setSize(new Dimension(10, 25));
+
 				GridBagConstraints gbc_textField = new GridBagConstraints();
 				gbc_textField.insets = new Insets(0, 0, 5, 5);
 				gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 				gbc_textField.gridx = x++;
 				gbc_textField.gridy = y;
 				add(txtField, gbc_textField);
-				txtField.setColumns(10);
+				txtField.setColumns(2);
 				txtField.setText("0.0");
 				txtField.setValue(new Double(0.0));
 				txtField.addFocusListener(getFocusListener());
 				txtField.addKeyListener(getKeyListener());
+				txtField.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						txtField.setText("");
+					}
+				});
 
 				txt.add(txtField);
 			}
 
 			JTextField txtEndOfRowTotal = new JTextField();
-			txtEndOfRowTotal.setPreferredSize(new Dimension(10, 25));
-			txtEndOfRowTotal.setSize(new Dimension(10, 25));
-			txtEndOfRowTotal.setSize(new Dimension(10, 25));
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.insets = new Insets(0, 0, 5, 5);
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textField.gridx = x;
 			gbc_textField.gridy = y;
 			add(txtEndOfRowTotal, gbc_textField);
-			txtEndOfRowTotal.setColumns(10);
+			txtEndOfRowTotal.setColumns(2);
 			txtEndOfRowTotal.setText("0.0");
 			txtEndOfRowTotal.setEditable(false);
 			txtEndOfRows.add(txtEndOfRowTotal);
@@ -251,7 +294,19 @@ public class TimesheetView extends JPanel {
 					project = dtoProject;
 				}
 			}
-			JLabel lblProject = new JLabel(project.getProjectName());
+			JButton hide = new JButton("Hide");
+			String projectName = project.getProjectName();
+			if (!projectName.equalsIgnoreCase("admin") && !projectName.equalsIgnoreCase("holiday")) {
+				GridBagConstraints gbc_hideTbn = new GridBagConstraints();
+				gbc_hideTbn.insets = new Insets(0, 0, 5, 5);
+				gbc_hideTbn.fill = GridBagConstraints.HORIZONTAL;
+				gbc_hideTbn.gridx = ++x;
+				gbc_hideTbn.gridy = y;
+				hide.addActionListener(hideBtnActionListener(dtoProjectTimeSheet));
+				add(hide, gbc_hideTbn);
+			}
+
+			JLabel lblProject = new JLabel(projectName);
 			GridBagConstraints gbc_lblProject = new GridBagConstraints();
 			gbc_lblProject.insets = new Insets(0, 0, 5, 5);
 			gbc_lblProject.anchor = GridBagConstraints.EAST;
@@ -261,14 +316,14 @@ public class TimesheetView extends JPanel {
 
 			y++;
 
-			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, Utils.getFirstDateOfWeek(getDateTime())));
+			rows.add(new Row(lblProject, txt, dtoProjectTimeSheet, Utils.getFirstDateOfWeek(getDateTime()), hide));
 		}
 
 		// Create separator
 		sep = new JSeparator(JSeparator.HORIZONTAL);
 		GridBagConstraints gbc_Sep = new GridBagConstraints();
-		gbc_Sep.insets = new Insets(0, 0, 5, 5);
-		gbc_Sep.fill = GridBagConstraints.HORIZONTAL;
+		gbc_Sep.anchor = GridBagConstraints.EAST;
+		gbc_Sep.insets = new Insets(0, 0, 5, 0);
 		gbc_Sep.gridx = 1;
 		gbc_Sep.gridwidth = 9;
 		gbc_Sep.gridy = y++;
@@ -279,29 +334,27 @@ public class TimesheetView extends JPanel {
 		for (JTextField jTextField : getTotalBoxes()) {
 			GridBagConstraints gbc_textField = new GridBagConstraints();
 			gbc_textField.insets = new Insets(0, 0, 5, 5);
-			jTextField.setPreferredSize(new Dimension(10, 25));
-			jTextField.setSize(new Dimension(10, 25));
 			gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 			gbc_textField.gridx = x2++;
 			gbc_textField.gridy = y;
 			add(jTextField, gbc_textField);
 			jTextField.setEditable(false);
-			jTextField.setColumns(10);
+			jTextField.setColumns(2);
 		}
 
 		GridBagConstraints gbc_textField = new GridBagConstraints();
 		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.gridx = x2++;
 		gbc_textField.gridy = y;
-		txtTotTotal.setPreferredSize(new Dimension(10, 25));
-		txtTotTotal.setSize(new Dimension(10, 25));
+		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		add(txtTotTotal, gbc_textField);
 		txtTotTotal.setEditable(false);
-		txtTotTotal.setColumns(10);
+		txtTotTotal.setColumns(2);
 
 		lblRowTotal = new JLabel("Total");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 0);
 		gbc_lblNewLabel.gridx = 9;
 		gbc_lblNewLabel.gridy = 0;
 		add(lblRowTotal, gbc_lblNewLabel);
@@ -314,6 +367,25 @@ public class TimesheetView extends JPanel {
 		gbg.gridy = y;
 		add(lblColumnTotal, gbg);
 
+	}
+
+	private ActionListener hideBtnActionListener(DTOProjectTimeSheet dtoProjectTimeSheet) {
+		return e -> {
+			String property = Props.getProperty(HIDE_PROPERTY);
+			if (property != null && property.contains(",")) {
+				String[] split = property.split(",");
+				List<String> asList = new ArrayList<>(Arrays.asList(split));
+				asList.add(String.valueOf(dtoProjectTimeSheet.getProjectId()));
+				Props.setProperty(HIDE_PROPERTY, String.join(",", asList));
+			} else {
+				Props.setProperty(HIDE_PROPERTY, String.valueOf(dtoProjectTimeSheet.getProjectId()) + ",");
+			}
+			try {
+				repopulateTextFields();
+			} catch (SQLException | RDNE e1) {
+				e1.printStackTrace();
+			}
+		};
 	}
 
 	private KeyListener getKeyListener() {
@@ -370,10 +442,10 @@ public class TimesheetView extends JPanel {
 
 	private void jbInit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gridBagLayout.columnWidths = new int[] { 0, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 1.0,
+		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 				Double.MIN_VALUE };
 		// HACK ALERT!
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
@@ -424,6 +496,7 @@ public class TimesheetView extends JPanel {
 
 		lblDay6 = new JLabel(".");
 		GridBagConstraints gbc_lblNewLabel_5 = new GridBagConstraints();
+		gbc_lblNewLabel_5.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblNewLabel_5.anchor = GridBagConstraints.NORTH;
 		gbc_lblNewLabel_5.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_5.gridx = 7;
@@ -432,6 +505,7 @@ public class TimesheetView extends JPanel {
 
 		lblDay7 = new JLabel(".");
 		GridBagConstraints gbc_lblNewLabel_6 = new GridBagConstraints();
+		gbc_lblNewLabel_6.fill = GridBagConstraints.HORIZONTAL;
 		gbc_lblNewLabel_6.anchor = GridBagConstraints.NORTH;
 		gbc_lblNewLabel_6.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_6.gridx = 8;
@@ -445,7 +519,8 @@ public class TimesheetView extends JPanel {
 		txtTot5 = new JTextField();
 		txtTot6 = new JTextField();
 		txtTot7 = new JTextField();
-		txtTotTotal = new JTextField();
+		txtTotTotal = new JTextField(2);
+		txtTotTotal.setName("test");
 
 		MainWindow.sendNotification("You can press F4 to add a note to logged time!");
 	}
