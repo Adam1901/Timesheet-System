@@ -16,7 +16,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -126,11 +125,9 @@ public class MainWindow extends JFrame {
 		JButton btnAddProject = new JButton("Add or Show Project");
 		btnAddProject.setToolTipText("Click to add a new project to your timesheet or show an existing one.");
 		btnAddProject.addActionListener(e -> {
-			try {
+			try (Connection connection = ConnectionManager.getConnection()) {
 				DbEngine dbEngine = new DbEngine();
-				List<DTOProject> projectList = dbEngine.getAllProjects();
-
-				Collections.sort(projectList, (v1, v2) -> v1.getProjectName().compareTo(v2.getProjectName()));
+				List<DTOProject> projectList = dbEngine.getAllProjectsForCombo(connection);
 
 				DTOProject[] projectArr = new DTOProject[projectList.size()];
 				projectArr = projectList.toArray(projectArr);
@@ -165,7 +162,6 @@ public class MainWindow extends JFrame {
 
 			} catch (SQLException | RDNE e1) {
 				LOGGER.log(Level.SEVERE, "", e1);
-
 			}
 		});
 

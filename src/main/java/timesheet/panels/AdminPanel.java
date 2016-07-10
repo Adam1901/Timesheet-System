@@ -206,7 +206,7 @@ public class AdminPanel extends JPanel {
 	private void fillCmbBoxes() {
 		DbEngine db = new DbEngine();
 		try (Connection connection = ConnectionManager.getConnection();) {
-			List<DTOProject> allProject = db.getAllProjects(connection);
+			List<DTOProject> allProject = db.getAllProjectsForCombo(connection);
 			List<DTOResource> allResources = db.getAllResources(connection);
 			for (DTOResource dtoResource : allResources) {
 				cmbUsers.addItem(dtoResource);

@@ -50,6 +50,7 @@ public class TimesheetView {
 	public static final String HIDE_PROPERTY = "hide";
 
 	private List<Row> rows = new ArrayList<>();
+	private List<Row> hiddenRows = new ArrayList<>();
 
 	private DateTime dateTime = Utils.getFirstDateOfWeek(new DateTime());
 
@@ -144,6 +145,7 @@ public class TimesheetView {
 			jTextField = null;
 		}
 		txtEndOfRows = new ArrayList<>();
+		hiddenRows = new ArrayList<>();
 
 		lblColumnTotal.setText("");
 		lblColumnTotal = null;
@@ -199,7 +201,7 @@ public class TimesheetView {
 	public void populateTextField(Connection connection) throws SQLException, RDNE {
 		DbEngine db = new DbEngine();
 		HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db.getLoggedTimeByResource(connection,
-				Application.resource, dateTime);
+				Application.resource, dateTime, null);
 
 		for (Row row : getRows()) {
 			List<DTOTime> times = null;
@@ -249,19 +251,23 @@ public class TimesheetView {
 				for (String id : hidden) {
 					int idi = Integer.valueOf(id);
 					if (idi == ts.getProjectId()) {
+						addHiddenToTotals(connection, db, ts, idi);
 						iterator.remove();
-						MainWindow.sendNotification("Projects hidden from view.");
 					}
 				}
 			}
+
+			List<String> strs = new ArrayList<String>();
+			List<DTOProject> allProjects = db.getAllProjects(connection);
+			for (DTOProject dtoProject : allProjects) {
+				for (String string : hidden) {
+					int id = Integer.valueOf(string);
+					if (id == dtoProject.getProjectId())
+						strs.add(dtoProject.getProjectName());
+				}
+			}
+			MainWindow.sendNotification("Projects (" + String.join(", ", strs) + ") hidden from view.");
 		}
-		// TODO
-		// This however causes a problem meaning it wont be counted in the
-		// totals.
-		// Work around: still add it to the stuff below but do some funky logic
-		// not to show it. That will hurt your brain though.
-		// OTHER workaround is chaning the calc total to look at DB. Will be
-		// slow though :(
 
 		// Perf fix
 		List<DTOProject> allProject = db.getAllProjects(connection);
@@ -319,8 +325,6 @@ public class TimesheetView {
 				}
 			}
 			JButton hide = new JButton("Hide");
-			hide.setToolTipText(
-					"NOTE: Hiding a row will mean the time in the row is not counted in the UI. Reporting will be unaffected.");
 			String projectName = project.getProjectName();
 			if (!projectName.equalsIgnoreCase("admin") && !projectName.equalsIgnoreCase("holiday")) {
 				GridBagConstraints gbc_hideTbn = new GridBagConstraints();
@@ -391,6 +395,32 @@ public class TimesheetView {
 		gbg.gridx = 1;
 		gbg.gridy = 2;
 		pan.add(lblColumnTotal, gbg);
+	}
+
+	/**
+	 * Add to hiddenRows with the bare amount of data so the totals will still
+	 * show the correct amount
+	 * 
+	 * @param connection
+	 * @param db
+	 * @param ts
+	 * @param idi
+	 * @throws SQLException
+	 */
+	private void addHiddenToTotals(Connection connection, DbEngine db, DTOProjectTimeSheet ts, int idi)
+			throws SQLException {
+		List<JFormattedTextFieldWithNotes> txtRowDay = new ArrayList<>();
+		HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db.getLoggedTimeByResource(connection,
+				Application.resource, getDateTime(), idi);
+		for (Entry<DTOProjectTimeSheet, List<DTOTime>> entry : loggedTimeByResource.entrySet()) {
+			List<DTOTime> value = entry.getValue();
+			for (DTOTime dtoTime : value) {
+				JFormattedTextFieldWithNotes txt = new JFormattedTextFieldWithNotes();
+				txt.setText(Utils.doubleValueOf(dtoTime.getLogged()));
+				txtRowDay.add(txt);
+			}
+		}
+		hiddenRows.add(new Row(null, txtRowDay, ts, null, null));
 	}
 
 	private void jbInit() {
@@ -512,12 +542,14 @@ public class TimesheetView {
 		double oldTotal = Double
 				.valueOf(txtTotTotal.getText() != null && !txtTotTotal.equals("") ? "0.0" : txtTotTotal.getText());
 
-		List<Row> rows2 = getRows();
+		List<Row> rows2 = new ArrayList<Row>(getRows());
+		// Add all hidden rows so they are counted
+		rows2.addAll(hiddenRows);
 		if (rows2.isEmpty())
 			return;
 		double time[][] = new double[rows2.size()][7];
-		for (int i = 0; i < getRows().size(); i++) {
-			Row row = getRows().get(i);
+		for (int i = 0; i < rows2.size(); i++) {
+			Row row = rows2.get(i);
 			for (int j = 0; j < row.getTxtRowDay().size(); j++) {
 				JTextField jTextField = row.getTxtRowDay().get(j);
 				double timeLogged = Double.valueOf(jTextField.getText());
@@ -528,7 +560,7 @@ public class TimesheetView {
 		// gets the total for the end of the rows
 		int it = 0;
 		{
-			double totalRowTime[] = new double[getRows().size()];
+			double totalRowTime[] = new double[rows2.size()];
 			for (double[] x : time) {
 				double tmp = 0.0;
 				for (double y : x) {

@@ -51,15 +51,16 @@ public class Application {
 		}
 	}
 
-	public static void login() throws SQLException, RDNE {
+	public static boolean login() throws SQLException, RDNE {
 		try {
 			Application.resource = new DbEngine().getResource(Application.name);
 		} catch (RDNE e) {
 			// try again
 			Application.name = null;
 			Props.setProperty("username", "");
-			JOptionPane.showMessageDialog(null, "Login Failed", "Login Failed", JOptionPane.ERROR_MESSAGE);
-			System.exit(0);
+			JOptionPane.showMessageDialog(null, "Login Failed", "Login Failed. Please relaunch the application",
+					JOptionPane.ERROR_MESSAGE);
+			return false;
 		}
 		if (Application.resource.getAdminLevel() == 0) {
 			JOptionPane.showConfirmDialog(null, "Account disabled");
@@ -70,6 +71,7 @@ public class Application {
 		MainWindow frame = new MainWindow();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
+		return true;
 	}
 
 }

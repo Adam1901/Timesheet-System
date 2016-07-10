@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -23,7 +24,7 @@ public class DbEngine {
 	// Lazy day, TODO refactor out
 
 	public HashMap<DTOProjectTimeSheet, List<DTOTime>> getLoggedTimeByResource(Connection connection, DTOResource res,
-			DateTime dateTime) throws SQLException {
+			DateTime dateTime, Integer project) throws SQLException {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append(
 				"SELECT date, timelogged, t.project_timesheet_id, resource_id, project_id, t.notes FROM time t ");
@@ -31,6 +32,8 @@ public class DbEngine {
 				"join project_timesheet pt where t.project_timesheet_id = pt.project_timesheet_id and pt.resource_id = ? ");
 		if (dateTime != null)
 			stringBuilder.append("AND t.date between ? AND ? ");
+		if (project != null)
+			stringBuilder.append(" AND pt.project_id = ?");
 		String sql = stringBuilder.toString();
 		HashMap<DTOProjectTimeSheet, List<DTOTime>> ret = new HashMap<>();
 		try (PreparedStatement ps = connection.prepareStatement(sql);) {
@@ -41,6 +44,8 @@ public class DbEngine {
 				dateTime2 = dateTime2.plusDays(7);
 				ps.setDate(3, new Date(dateTime2.getMillis()));
 			}
+			if (project != null)
+				ps.setInt(4, project);
 			try (ResultSet rs = ps.executeQuery()) {
 				while (rs.next()) {
 					int i = 1;
@@ -121,21 +126,26 @@ public class DbEngine {
 		}
 	}
 
-	public List<DTOProject> getAllProjects() throws SQLException {
-		try (Connection connection = ConnectionManager.getConnection();) {
-			return getAllProjects(connection);
-		}
+	public List<DTOProject> getAllProjects(Connection connection) throws SQLException {
+		String sql = "SELECT project_id, project_name FROM project";
+		return returnSortedProjects(connection, sql);
 	}
 
-	public List<DTOProject> getAllProjects(Connection connection) throws SQLException {
+	public List<DTOProject> getAllProjectsForCombo(Connection connection) throws SQLException {
+		String sql = "SELECT project_id, project_name FROM project "
+				+ " WHERE LOWER(project_name) <> 'admin' AND LOWER(project_name) <> 'holiday'";
+		return returnSortedProjects(connection, sql);
+	}
+
+	private List<DTOProject> returnSortedProjects(Connection connection, String sql) throws SQLException {
 		List<DTOProject> projects = new ArrayList<>();
-		String sql = "SELECT project_id, project_name FROM project";
 		try (PreparedStatement ps = connection.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 			while (rs.next()) {
 				projects.add(new DTOProject(rs.getInt(1), rs.getString(2)));
 			}
+			Collections.sort(projects, (v1, v2) -> v1.getProjectName().compareTo(v2.getProjectName()));
+			return projects;
 		}
-		return projects;
 	}
 
 	public boolean addProject(String name) throws SQLException {

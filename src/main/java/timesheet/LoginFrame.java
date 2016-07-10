@@ -55,8 +55,8 @@ public class LoginFrame extends JFrame {
 		btnLogin.addActionListener(e -> {
 			try {
 				Application.name = txtUserName.getText();
-				Application.login();
-				setVisible(false);
+				if (Application.login())
+					setVisible(false);
 			} catch (SQLException | RDNE e1) {
 			}
 		});

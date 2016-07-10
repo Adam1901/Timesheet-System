@@ -44,7 +44,7 @@ public class Achievement {
 			}
 
 			HashMap<DTOProjectTimeSheet, List<DTOTime>> loggedTimeByResource = db.getLoggedTimeByResource(connection,
-					Application.resource, null);
+					Application.resource, null, null);
 			for (Entry<DTOProjectTimeSheet, List<DTOTime>> dtoTime : loggedTimeByResource.entrySet()) {
 				double timeInProj = 0.0;
 				for (DTOTime dtoTime2 : dtoTime.getValue()) {

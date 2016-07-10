@@ -54,7 +54,7 @@ public class ReportView extends JPanel {
 	private void fillCmbBoxes() throws SQLException {
 		DbEngine db = new DbEngine();
 		try (Connection connection = ConnectionManager.getConnection();) {
-			List<DTOProject> allProject = db.getAllProjects(connection);
+			List<DTOProject> allProject = db.getAllProjectsForCombo(connection);
 			List<DTOResource> allResources = db.getAllResources(connection);
 			for (DTOResource dtoResource : allResources) {
 				cmbUserList.addItem(dtoResource);
