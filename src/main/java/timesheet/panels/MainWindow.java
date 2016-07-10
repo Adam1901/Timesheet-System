@@ -10,8 +10,6 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
@@ -68,7 +66,6 @@ public class MainWindow extends JFrame {
 	 */
 	public MainWindow() throws SQLException, RDNE {
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		LOGGER.info("test");
 		setBounds(100, 100, 763, 537);
 		setSize(1090, 372);
 
@@ -109,14 +106,10 @@ public class MainWindow extends JFrame {
 		DateTime date = Utils.getFirstDateOfWeek(timesheetView.getDateTime());
 		UtilDateModel createDateModel = Utils.createDateModel(date);
 		JDatePanelImpl datePanel = new JDatePanelImpl(createDateModel, p);
-		datePanel.addActionListener(new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				DateTime dt = new DateTime(createDateModel.getValue().getTime());
-				dt = Utils.getFirstDateOfWeek(dt);
-				setDate(dt, timesheetView, createDateModel);
-			}
+		datePanel.addActionListener(e -> {
+			DateTime dt = new DateTime(createDateModel.getValue().getTime());
+			dt = Utils.getFirstDateOfWeek(dt);
+			setDate(dt, timesheetView, createDateModel);
 		});
 
 		tabbedPane.addTab("Timesheet", null, timesheetView.getPanel(), null);
@@ -133,7 +126,6 @@ public class MainWindow extends JFrame {
 		JButton btnAddProject = new JButton("Add or Show Project");
 		btnAddProject.setToolTipText("Click to add a new project to your timesheet or show an existing one.");
 		btnAddProject.addActionListener(e -> {
-
 			try {
 				DbEngine dbEngine = new DbEngine();
 				List<DTOProject> projectList = dbEngine.getAllProjects();
@@ -231,7 +223,7 @@ public class MainWindow extends JFrame {
 		contentPane.add(btnSave, gbc_btnsave);
 
 		GridBagConstraints gbc_lblNotify = new GridBagConstraints();
-		gbc_lblNotify.gridwidth = 8;
+		gbc_lblNotify.gridwidth = 10;
 		gbc_lblNotify.anchor = GridBagConstraints.WEST;
 		gbc_lblNotify.insets = new Insets(0, 0, 0, 5);
 		gbc_lblNotify.gridx = 1;
@@ -246,7 +238,7 @@ public class MainWindow extends JFrame {
 				if (madeChanges) {
 					int dialogResult = JOptionPane.showConfirmDialog(null,
 							"You have unsaved changes! Do you want to quit without saving?", "Warning",
-							JOptionPane.WARNING_MESSAGE);
+							JOptionPane.YES_NO_OPTION);
 					if (dialogResult == JOptionPane.YES_OPTION) {
 						System.exit(0);
 					}

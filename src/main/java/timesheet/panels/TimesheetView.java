@@ -307,6 +307,7 @@ public class TimesheetView {
 			gbc_textField.gridy = y;
 			timeview.add(txtEndOfRowTotal, gbc_textField);
 			txtEndOfRowTotal.setColumns(2);
+			txtEndOfRowTotal.setBackground(Color.LIGHT_GRAY);
 			txtEndOfRowTotal.setText("0.0");
 			txtEndOfRowTotal.setEditable(false);
 			txtEndOfRows.add(txtEndOfRowTotal);
@@ -465,7 +466,6 @@ public class TimesheetView {
 		txtTot6 = new JTextField();
 		txtTot7 = new JTextField();
 		txtTotTotal = new JTextField(2);
-		txtTotTotal.setName("test");
 
 		scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();

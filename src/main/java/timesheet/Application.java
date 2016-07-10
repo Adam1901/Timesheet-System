@@ -20,9 +20,12 @@ public class Application {
 	public static double HOURS_IN_DAY = 7.5;
 	public static double HOURS_IN_WEEK = 37.5;
 
-	public static void main(String[] args)
-			throws ClassNotFoundException, SQLException, UnsupportedLookAndFeelException, RDNE {
-		UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
+	public static void main(String[] args) throws ClassNotFoundException, SQLException, RDNE {
+		try {
+			UIManager.setLookAndFeel(new SeaGlassLookAndFeel());
+		} catch (UnsupportedLookAndFeelException e) {
+			e.printStackTrace();
+		}
 
 		String propertyName = Props.getProperty("username");
 		String nameToUse = null;
@@ -56,7 +59,7 @@ public class Application {
 			Application.name = null;
 			Props.setProperty("username", "");
 			JOptionPane.showMessageDialog(null, "Login Failed", "Login Failed", JOptionPane.ERROR_MESSAGE);
-			return;
+			System.exit(0);
 		}
 		if (Application.resource.getAdminLevel() == 0) {
 			JOptionPane.showConfirmDialog(null, "Account disabled");

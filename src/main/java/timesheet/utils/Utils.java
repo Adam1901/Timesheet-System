@@ -28,8 +28,7 @@ public class Utils {
 		String format = df.format(d);
 		return format;
 	}
-	
-	
+
 	public static UtilDateModel createDateModel(DateTime date) {
 		UtilDateModel utilDateModel = new UtilDateModel();
 		int year = date.getYear();
@@ -65,6 +64,5 @@ public class Utils {
 
 			return "";
 		}
-
 	}
 }

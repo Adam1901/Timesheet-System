@@ -221,7 +221,7 @@ public class ReportView extends JPanel {
 				stringBuilder.append("\". The time was logged between: ").append(fmt.print(report.getStart()));
 				stringBuilder.append(" - ").append(fmt.print(report.getEnd()));
 				stringBuilder.append(". The amount of time looged is: ").append(runReport).append(" hours.");
-				stringBuilder.append("\n");
+				stringBuilder.append(System.lineSeparator());
 				textPane.setText(stringBuilder.toString());
 			} catch (SQLException e) {
 				LOGGER.log(Level.SEVERE, "", e);

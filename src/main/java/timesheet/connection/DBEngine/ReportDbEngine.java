@@ -78,7 +78,7 @@ public class ReportDbEngine {
 					ret.append(rs.getString(1) + ", ");
 					ret.append(rs.getString(2) + ", ");
 					double double1 = rs.getDouble(3);
-					ret.append(double1 + "\n");
+					ret.append(double1 + System.lineSeparator());
 				}
 			}
 		}
