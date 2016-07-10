@@ -1,8 +1,11 @@
 package timesheet;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 
 import javax.swing.JButton;
@@ -22,6 +25,7 @@ public class LoginFrame extends JFrame {
 	 * Create the frame.
 	 */
 	public LoginFrame(String[] args) {
+		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 479, 67);
 		contentPane = new JPanel();
@@ -50,15 +54,19 @@ public class LoginFrame extends JFrame {
 		gbc_txtUserName.gridy = 0;
 		contentPane.add(txtUserName, gbc_txtUserName);
 		txtUserName.setColumns(10);
+		txtUserName.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(KeyEvent e) {
+				super.keyPressed(e);
+				if (10 == e.getKeyCode()) {
+					loginPressed();
+				}
+			}
+		});
 
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(e -> {
-			try {
-				Application.name = txtUserName.getText();
-				if (Application.login())
-					setVisible(false);
-			} catch (SQLException | RDNE e1) {
-			}
+			loginPressed();
 		});
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.fill = GridBagConstraints.HORIZONTAL;
@@ -66,5 +74,17 @@ public class LoginFrame extends JFrame {
 		gbc_btnNewButton.gridx = 2;
 		gbc_btnNewButton.gridy = 0;
 		contentPane.add(btnLogin, gbc_btnNewButton);
+		Dimension size = getSize();
+		setMaximumSize(size);
+		setMinimumSize(size);
+	}
+
+	private void loginPressed() {
+		try {
+			Application.name = txtUserName.getText();
+			if (Application.login())
+				setVisible(false);
+		} catch (SQLException | RDNE e1) {
+		}
 	}
 }

@@ -177,7 +177,7 @@ public class TimesheetView {
 		return true;
 	}
 
-	private double[] columnSum(double[][] array) {
+	private double[] sumColumns(double[][] array) {
 		int size = array[0].length;
 		double temp[] = new double[size];
 
@@ -559,61 +559,57 @@ public class TimesheetView {
 
 		// gets the total for the end of the rows
 		int it = 0;
-		{
-			double totalRowTime[] = new double[rows2.size()];
-			for (double[] x : time) {
-				double tmp = 0.0;
-				for (double y : x) {
-					tmp += y;
-				}
-				totalRowTime[it++] = tmp;
+		double totalRowTime[] = new double[rows2.size()];
+		for (double[] x : time) {
+			double tmp = 0.0;
+			for (double y : x) {
+				tmp += y;
 			}
-			for (int k = 0; k < txtEndOfRows.size(); k++) {
-				JTextField jTextField = txtEndOfRows.get(k);
-				try {
-					jTextField.setText(Utils.doubleValueOf(totalRowTime[k]));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+			totalRowTime[it++] = tmp;
+		}
+		for (int k = 0; k < txtEndOfRows.size(); k++) {
+			JTextField jTextField = txtEndOfRows.get(k);
+			try {
+				jTextField.setText(Utils.doubleValueOf(totalRowTime[k]));
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-		{
-			// gets the column totals
-			double totalTime[] = columnSum(time);
+		// gets the column totals
+		double totalTime[] = sumColumns(time);
 
-			// sets totals at bottom
-			JTextField[] totalBoxes = getTotalBoxes();
-			for (int j = 0; j < totalBoxes.length; j++) {
-				double d = totalTime[j];
-				if (d < Application.HOURS_IN_DAY) {
-					totalBoxes[j].setBackground(Color.RED);
-				} else if (d == Application.HOURS_IN_DAY) {
-					totalBoxes[j].setBackground(Color.YELLOW);
-				} else if (d > Application.HOURS_IN_DAY) {
-					totalBoxes[j].setBackground(Color.GREEN);
-				}
-				totalBoxes[j].setText(Utils.doubleValueOf(d));
-				if (d > 24.0) {
-					DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM");
-					MainWindow.sendErrorNotification("More than 24 hours logged in a day W/C " + fmt.print(dateTime)
-							+ ". Please check your input!");
-					totalBoxes[j].setBackground(Color.MAGENTA);
-				}
+		// sets totals at bottom
+		JTextField[] totalBoxes = getTotalBoxes();
+		for (int j = 0; j < totalBoxes.length; j++) {
+			double d = totalTime[j];
+			if (d < Application.HOURS_IN_DAY) {
+				totalBoxes[j].setBackground(Color.RED);
+			} else if (d == Application.HOURS_IN_DAY) {
+				totalBoxes[j].setBackground(Color.YELLOW);
+			} else if (d > Application.HOURS_IN_DAY) {
+				totalBoxes[j].setBackground(Color.GREEN);
 			}
+			totalBoxes[j].setText(Utils.doubleValueOf(d));
+			if (d > 24.0) {
+				DateTimeFormatter fmt = DateTimeFormat.forPattern("dd/MM");
+				MainWindow.sendErrorNotification(
+						"More than 24 hours logged in a day W/C " + fmt.print(dateTime) + ". Please check your input!");
+				totalBoxes[j].setBackground(Color.MAGENTA);
+			}
+		}
 
-			// Set colour the bottom right total
-			double tmp = 0.0;
-			for (double d : totalTime) {
-				tmp += d;
-			}
-			txtTotTotal.setText(Utils.doubleValueOf(tmp));
-			if (tmp < Application.HOURS_IN_WEEK) {
-				txtTotTotal.setBackground(Color.RED);
-			} else if (tmp == Application.HOURS_IN_WEEK) {
-				txtTotTotal.setBackground(Color.YELLOW);
-			} else if (tmp > Application.HOURS_IN_WEEK) {
-				txtTotTotal.setBackground(Color.GREEN);
-			}
+		// Set colour the bottom right total
+		double tmp = 0.0;
+		for (double dd : totalTime) {
+			tmp += dd;
+		}
+		txtTotTotal.setText(Utils.doubleValueOf(tmp));
+		if (tmp < Application.HOURS_IN_WEEK) {
+			txtTotTotal.setBackground(Color.RED);
+		} else if (tmp == Application.HOURS_IN_WEEK) {
+			txtTotTotal.setBackground(Color.YELLOW);
+		} else if (tmp > Application.HOURS_IN_WEEK) {
+			txtTotTotal.setBackground(Color.GREEN);
 		}
 
 		double newTotal = Double.valueOf(txtTotTotal.getText());
