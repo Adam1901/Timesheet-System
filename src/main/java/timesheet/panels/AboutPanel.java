@@ -23,10 +23,10 @@ public class AboutPanel extends JPanel {
 
 	public AboutPanel() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 5, 0 };
-		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+		gridBagLayout.columnWidths = new int[] { 5, 0, 0, 0, 5, 0 };
+		gridBagLayout.rowHeights = new int[] { 5, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
 		JLabel lblFaqIfYou = new JLabel(
@@ -72,14 +72,6 @@ public class AboutPanel extends JPanel {
 		gbc_lblIfTheyPresist.gridy = 7;
 		add(lblIfTheyPresist, gbc_lblIfTheyPresist);
 
-		JLabel lblNewLabel = new JLabel("Made by Adam Meadows of Qmatic UK");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.fill = GridBagConstraints.HORIZONTAL;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 3;
-		gbc_lblNewLabel.gridy = 8;
-		add(lblNewLabel, gbc_lblNewLabel);
-
 		JButton btnDidYouWin = new JButton("Did you win?");
 		btnDidYouWin.addActionListener(e -> {
 			try {
@@ -89,17 +81,25 @@ public class AboutPanel extends JPanel {
 			} catch (SQLException ee) {
 			}
 		});
+
+		JLabel lblNewLabel = new JLabel("Made by Adam Meadows of Qmatic UK");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.fill = GridBagConstraints.HORIZONTAL;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 3;
+		gbc_lblNewLabel.gridy = 7;
+		add(lblNewLabel, gbc_lblNewLabel);
 		GridBagConstraints gbc_btnDidYouWin = new GridBagConstraints();
 		gbc_btnDidYouWin.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnDidYouWin.insets = new Insets(0, 0, 0, 5);
 		gbc_btnDidYouWin.gridx = 2;
-		gbc_btnDidYouWin.gridy = 9;
+		gbc_btnDidYouWin.gridy = 8;
 		add(btnDidYouWin, gbc_btnDidYouWin);
 		GridBagConstraints gbc_btnLogout = new GridBagConstraints();
 		gbc_btnLogout.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnLogout.insets = new Insets(0, 0, 0, 5);
 		gbc_btnLogout.gridx = 3;
-		gbc_btnLogout.gridy = 9;
+		gbc_btnLogout.gridy = 8;
 		add(btnLogout, gbc_btnLogout);
 	}
 }

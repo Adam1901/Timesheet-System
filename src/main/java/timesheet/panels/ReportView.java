@@ -82,6 +82,7 @@ public class ReportView extends JPanel {
 		add(lblNewLabel, gbc_lblNewLabel);
 
 		JCheckBox chcUseUsers = new JCheckBox("Use all users?");
+		lblNewLabel.setLabelFor(chcUseUsers);
 		chcUseUsers.addActionListener(e -> {
 			if (chcUseUsers.isSelected()) {
 				cmbUserList.setEnabled(false);
@@ -129,6 +130,7 @@ public class ReportView extends JPanel {
 		add(lblProject, gbc_lblProject);
 
 		JCheckBox chckbxNewCheckBox = new JCheckBox("Use All projects?");
+		lblProject.setLabelFor(chckbxNewCheckBox);
 		chckbxNewCheckBox.addActionListener(arg0 -> {
 			if (chckbxNewCheckBox.isSelected()) {
 				cmbProjectList.setEnabled(false);
@@ -162,6 +164,7 @@ public class ReportView extends JPanel {
 		add(lblNewLabel_1, gbc_lblNewLabel_1);
 		// Don't know about the formatter, but there it is...
 		JDatePickerImpl startDatePicker = new JDatePickerImpl(datePanel, new Utils().new DateLabelFormatter());
+		lblNewLabel_1.setLabelFor(startDatePicker);
 
 		GridBagConstraints gbc_Date1 = new GridBagConstraints();
 		gbc_Date1.fill = GridBagConstraints.HORIZONTAL;
@@ -180,6 +183,7 @@ public class ReportView extends JPanel {
 		add(lblEndDate, gbc_lblEndDate);
 
 		JDatePickerImpl endDatePicker = new JDatePickerImpl(datePanel2, new Utils().new DateLabelFormatter());
+		lblEndDate.setLabelFor(endDatePicker);
 		GridBagConstraints gbc_Date2 = new GridBagConstraints();
 		gbc_Date2.insets = new Insets(0, 0, 5, 5);
 		gbc_Date2.fill = GridBagConstraints.HORIZONTAL;

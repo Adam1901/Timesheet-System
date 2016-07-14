@@ -50,10 +50,11 @@ import timesheet.utils.Props;
 import timesheet.utils.Utils;
 
 public class MainWindow extends JFrame {
+
 	private final static Logger LOGGER = Logger.getLogger(MainWindow.class.getName());
 
 	private static final long serialVersionUID = 1L;
-	private JPanel contentPane;
+	private static JPanel contentPane;
 	private static JLabel lblNotify = new JLabel("Status: Loading");
 	public static boolean madeChanges = false;
 
@@ -80,7 +81,7 @@ public class MainWindow extends JFrame {
 		setContentPane(contentPane);
 
 		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 0, 0, 100, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0 };
+		gbl_contentPane.columnWidths = new int[] { 0, 5, 100, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0 };
 		gbl_contentPane.rowHeights = new int[] { 0, 0, 0, 0, 0 };
 		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 				Double.MIN_VALUE };
@@ -115,6 +116,7 @@ public class MainWindow extends JFrame {
 		tabbedPane.addTab("Reports", null, new ReportView(), null);
 		if (Application.resource.getAdminLevel() >= 2)
 			tabbedPane.addTab("Admin", null, new AdminPanel(), null);
+		tabbedPane.addTab("Guess work", null, new GuessWorkPanel(), null);
 		tabbedPane.addTab("About", null, new AboutPanel(), null);
 
 		JButton btnSave = new JButton("Save");

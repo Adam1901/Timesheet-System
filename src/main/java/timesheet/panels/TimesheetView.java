@@ -388,7 +388,7 @@ public class TimesheetView {
 		gbc_lblNewLabel.gridy = 0;
 		pan.add(lblRowTotal, gbc_lblNewLabel);
 
-		lblColumnTotal = new JLabel("Total");
+		lblColumnTotal = new JLabel("Total  ");
 		GridBagConstraints gbg = new GridBagConstraints();
 		gbg.anchor = GridBagConstraints.EAST;
 		gbg.insets = new Insets(0, 0, 0, 5);

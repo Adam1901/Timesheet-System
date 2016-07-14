@@ -22,7 +22,7 @@ public class ConnectionManager {
 		dataSource.setMaxWaitMillis(10000);
 		dataSource.setMaxIdle(10);
 		dataSource.setMaxConnLifetimeMillis(0);
-		dataSource.setMaxTotal(30);
+		dataSource.setMaxTotal(-1);
 	}
 
 	private ConnectionManager() {
