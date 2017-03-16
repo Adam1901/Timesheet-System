@@ -6,6 +6,7 @@ import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -21,23 +22,28 @@ import timesheet.extras.WindowWatcher;
 import timesheet.utils.Props;
 
 public class GuessWorkPanel extends JPanel {
-	WindowWatcher windowWatcher = new WindowWatcher();
-	DefaultListModel<String> listModel = new DefaultListModel<>();
-	JList<String> list = new JList<String>(listModel);
+	private static final long serialVersionUID = 1L;
+	boolean running = false;
 
 	public GuessWorkPanel() {
+		WindowWatcher windowWatcher = new WindowWatcher();
+		DefaultListModel<String> listModel = new DefaultListModel<>();
+		JList<String> list = new JList<String>(listModel);
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0 };
+		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, Double.MIN_VALUE };
+		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
 		gridBagLayout.rowWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
 		JButton btnNewButton = new JButton("Start");
 		btnNewButton.addActionListener(arg0 -> {
 			Props.setProperty("WatchWindows", "true");
-			Thread t = new Thread(windowWatcher);
-			t.start();
+			if (!running) {
+				Thread t = new Thread(windowWatcher);
+				t.start();
+				running = true;
+			}
 		});
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 5);
@@ -80,7 +86,6 @@ public class GuessWorkPanel extends JPanel {
 					} else {
 						return compareTo;
 					}
-
 				}
 			});
 
@@ -99,23 +104,33 @@ public class GuessWorkPanel extends JPanel {
 				"Note: It does try to be clever. However it should not be relied on, and it is not 100% accurate");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
 		gbc_lblNewLabel.anchor = GridBagConstraints.WEST;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 2;
 		gbc_lblNewLabel.gridy = 0;
 		add(lblNewLabel, gbc_lblNewLabel);
 
+		JButton btnNewButton_2 = new JButton("Erase History");
+		btnNewButton_2.addActionListener(arg0 -> {
+			windowWatcher.setTime(new HashMap<>());
+			listModel.removeAllElements();
+		});
+		GridBagConstraints gbc_btnNewButton_2 = new GridBagConstraints();
+		gbc_btnNewButton_2.insets = new Insets(0, 0, 5, 0);
+		gbc_btnNewButton_2.gridx = 3;
+		gbc_btnNewButton_2.gridy = 0;
+		add(btnNewButton_2, gbc_btnNewButton_2);
+
 		JScrollPane scrollPane = new JScrollPane();
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.insets = new Insets(0, 0, 0, 5);
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridwidth = 3;
+		gbc_scrollPane.gridwidth = 4;
 		gbc_scrollPane.gridx = 0;
 		gbc_scrollPane.gridy = 1;
 		add(scrollPane, gbc_scrollPane);
 
 		scrollPane.setViewportView(list);
 	}
-
-	private static final long serialVersionUID = 1L;
 
 	private String secondsToString(int pTime) {
 		return String.format("%02d:%02d", pTime / 60, pTime % 60);

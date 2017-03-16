@@ -17,6 +17,10 @@ import timesheet.DTO.DTOProcess;
 public class WindowWatcher implements Runnable {
 	private Map<String, Integer> time = new HashMap<String, Integer>();
 
+	public void setTime(Map<String, Integer> time) {
+		this.time = time;
+	}
+
 	public Map<String, Integer> getAdjustedTime() {
 		Map<String, Integer> result = new LinkedHashMap<>();
 		Stream<Map.Entry<String, Integer>> st = time.entrySet().stream();
@@ -87,7 +91,10 @@ public class WindowWatcher implements Runnable {
 				long diff = end - start;
 				int wait = 1000;
 
-				Thread.sleep((wait - diff) + diff);
+				long actualWait = (wait - diff) + diff;
+				Thread.sleep(actualWait);
+				System.out.println(actualWait);
+
 			} catch (InterruptedException e) {
 			}
 		}

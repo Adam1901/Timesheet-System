@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
+import timesheet.DTO.DTOResource;
 import timesheet.connection.ConnectionManager;
 import timesheet.utils.Utils;
 
@@ -86,11 +87,45 @@ public class ReportDbEngine {
 		return ret.toString();
 	}
 
-	/*
-	 * SELECT r.resource_name, p.project_name, sum(t.timelogged) FROM time t,
-	 * resource r, project p, project_timesheet pt WHERE pt.project_id =
-	 * p.project_id AND pt.resource_id = r.resource_id AND
-	 * pt.project_timesheet_id = t.project_timesheet_id GROUP BY resource_name,
-	 * project_name;
-	 */
+	public String runProjectReport(DateTime start, DateTime end) throws SQLException {
+		StringBuilder title = new StringBuilder();
+		StringBuilder ret = new StringBuilder();
+		String sql = " SELECT  p.project_name, ROUND(SUM(t.timelogged), 1)";
+		sql += "          FROM time t, ";
+		sql += "           project p, ";
+		sql += "           project_timesheet pt ";
+		sql += "     WHERE pt.project_id = p.project_id ";
+		sql += "       AND pt.resource_id = ?";
+		sql += "       AND pt.project_timesheet_id = t.project_timesheet_id ";
+		if (start != null && end != null)
+			sql += "       AND t.date BETWEEN ? AND ? ";
+		sql += " GROUP BY project_name ";
+
+		title.append("Project Name, ");
+		try (Connection connection = ConnectionManager.getConnection();
+				PreparedStatement ps = connection.prepareStatement(sql.toString());) {
+			List<DTOResource> allResources = new DbEngine().getAllResources(connection);
+			for (DTOResource dtoResource : allResources) {
+				title.append(dtoResource.getResourceName() + ", ");
+				ps.setInt(1, dtoResource.getResourceId());
+				if (start != null && end != null) {
+					ps.setDate(2, new Date(start.getMillis()));
+					ps.setDate(3, new Date(end.getMillis()));
+				}
+
+				try (ResultSet rs = ps.executeQuery()) {
+					ps.clearParameters();
+					while (rs.next()) {
+						ret.append(rs.getString(1) + ", ");
+						double double1 = rs.getDouble(2);
+						ret.append(double1 + System.lineSeparator());
+					}
+					ret.append("0.0, ");
+				}
+
+			}
+		}
+		return title.toString() + System.lineSeparator() + ret.toString();
+	}
+
 }

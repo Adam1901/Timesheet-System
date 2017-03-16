@@ -3,6 +3,8 @@ package timesheet.panels;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -68,9 +70,9 @@ public class ReportView extends JPanel {
 	private void jbInit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 5, 0, 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.rowHeights = new int[] { 5, 0, 0, 0, 0, 0, 5, 0 };
+		gridBagLayout.rowHeights = new int[] { 5, 0, 0, 0, 0, 0, 0, 5, 0 };
 		gridBagLayout.columnWeights = new double[] { 0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
-		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, Double.MIN_VALUE };
+		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
 		JLabel lblNewLabel = new JLabel("User:");
@@ -277,6 +279,29 @@ public class ReportView extends JPanel {
 		textPane = new JTextPane();
 		scrollPane.setViewportView(textPane);
 		textPane.setEditable(false);
+
+		JButton btnProjectReportCSV = new JButton("Run Project Report as CSV");
+		btnProjectReportCSV.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				String runLargeReport;
+				try {
+					runLargeReport = new ReportDbEngine().runProjectReport(Utils.getDateTime(startDatePicker),
+							Utils.getDateTime(endDatePicker));
+					System.out.println(runLargeReport);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+		GridBagConstraints gbc_btnProjectReportCSV = new GridBagConstraints();
+		gbc_btnProjectReportCSV.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnProjectReportCSV.gridwidth = 5;
+		gbc_btnProjectReportCSV.insets = new Insets(0, 0, 5, 5);
+		gbc_btnProjectReportCSV.gridx = 1;
+		gbc_btnProjectReportCSV.gridy = 6;
+		add(btnProjectReportCSV, gbc_btnProjectReportCSV);
 	}
 
 }
