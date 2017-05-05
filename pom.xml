@@ -4,7 +4,7 @@
 
 	<groupId>timesheet</groupId>
 	<artifactId>timesheet</artifactId>
-	<version>0.1.0</version>
+	<version>0.2.0</version>
 	<packaging>jar</packaging>
 
 	<name>timesheet</name>
@@ -97,4 +97,8 @@
 			</plugin>
 		</plugins>
 	</build>
+	<organization>
+		<name>Qmatic</name>
+		<url>http://qmatic.com</url>
+	</organization>
 </project>
