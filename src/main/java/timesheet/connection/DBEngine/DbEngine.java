@@ -148,12 +148,13 @@ public class DbEngine {
 		}
 	}
 
-	public boolean addProject(String name) throws SQLException {
-		String sql = "INSERT INTO project (project_name) VALUES (?)";
+	public boolean addProject(String name, double assignedTime) throws SQLException {
+		String sql = "INSERT INTO project (project_name, assignedTime) VALUES (?, ?)";
 
 		try (Connection connection = ConnectionManager.getConnection();
 				PreparedStatement ps = connection.prepareStatement(sql);) {
 			ps.setString(1, name);
+			ps.setDouble(2, assignedTime);
 			int executeUpdate = ps.executeUpdate();
 			if (executeUpdate == 1) {
 				connection.commit();

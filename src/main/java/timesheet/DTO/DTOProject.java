@@ -6,6 +6,7 @@ public class DTOProject implements Serializable {
 	private static final long serialVersionUID = 1L;
 	int projectId;
 	String projectName;
+	double assignedTime = 0.0;
 
 	public int getProjectId() {
 		return projectId;
@@ -28,11 +29,14 @@ public class DTOProject implements Serializable {
 	public void setProjectName(String projectName) {
 		this.projectName = projectName;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(assignedTime);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + projectId;
 		result = prime * result + ((projectName == null) ? 0 : projectName.hashCode());
 		return result;
@@ -47,6 +51,8 @@ public class DTOProject implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		DTOProject other = (DTOProject) obj;
+		if (Double.doubleToLongBits(assignedTime) != Double.doubleToLongBits(other.assignedTime))
+			return false;
 		if (projectId != other.projectId)
 			return false;
 		if (projectName == null) {

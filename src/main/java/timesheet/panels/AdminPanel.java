@@ -24,6 +24,8 @@ import timesheet.DTO.DTOProject;
 import timesheet.DTO.DTOResource;
 import timesheet.connection.ConnectionManager;
 import timesheet.connection.DBEngine.DbEngine;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 public class AdminPanel extends JPanel {
 	private final static Logger LOGGER = Logger.getLogger(AdminPanel.class.getName());
@@ -43,9 +45,9 @@ public class AdminPanel extends JPanel {
 
 	private void jbInit() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0 };
+		gridBagLayout.columnWidths = new int[] { 0, 0, 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 1.0, 0.0 };
+		gridBagLayout.columnWeights = new double[] { 0.0, 1.0, 0.0, 1.0, 0.0 };
 		gridBagLayout.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
 		setLayout(gridBagLayout);
 
@@ -56,10 +58,19 @@ public class AdminPanel extends JPanel {
 		gbc_lblNewLabel.gridx = 0;
 		gbc_lblNewLabel.gridy = 0;
 		add(lblNewLabel, gbc_lblNewLabel);
+		
+		JSpinner numAssTime = new JSpinner();
+		numAssTime.setModel(new SpinnerNumberModel(new Double(0), new Double(0), null, new Double(1)));
+		GridBagConstraints gbc_numAssTime = new GridBagConstraints();
+		gbc_numAssTime.fill = GridBagConstraints.HORIZONTAL;
+		gbc_numAssTime.insets = new Insets(0, 0, 5, 5);
+		gbc_numAssTime.gridx = 3;
+		gbc_numAssTime.gridy = 0;
+		add(numAssTime, gbc_numAssTime);
+		
 
 		textField = new JTextField();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.gridwidth = 2;
 		gbc_textField.insets = new Insets(0, 0, 5, 5);
 		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
 		gbc_textField.gridx = 1;
@@ -68,12 +79,14 @@ public class AdminPanel extends JPanel {
 		textField.setColumns(10);
 		GridBagConstraints gbc_btnNewButton = new GridBagConstraints();
 		gbc_btnNewButton.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton.gridx = 3;
+		gbc_btnNewButton.gridx = 4;
 		gbc_btnNewButton.gridy = 0;
 		btnAddProject.addActionListener(e -> {
 			String project = textField.getText();
+			double numbAssTime = (double) numAssTime.getValue();
+			
 			try {
-				if (!new DbEngine().addProject(project))
+				if (!new DbEngine().addProject(project, numbAssTime))
 					MainWindow.sendErrorNotification(
 							"Failed to add project. Perhaps it already exists? Please restart the application");
 			} catch (SQLException e1) {
@@ -82,13 +95,21 @@ public class AdminPanel extends JPanel {
 				LOGGER.log(Level.SEVERE, "failed to add", e1);
 			}
 		});
+		
+		JLabel lblAssignedTime = new JLabel("Assigned Time:");
+		GridBagConstraints gbc_lblAssignedTime = new GridBagConstraints();
+		gbc_lblAssignedTime.insets = new Insets(0, 0, 5, 5);
+		gbc_lblAssignedTime.gridx = 2;
+		gbc_lblAssignedTime.gridy = 0;
+		add(lblAssignedTime, gbc_lblAssignedTime);
+		
 		add(btnAddProject, gbc_btnNewButton);
 
 		JSeparator separator = new JSeparator();
 		separator.setPreferredSize(new Dimension(20, 20));
 		GridBagConstraints gbc_separator = new GridBagConstraints();
 		gbc_separator.fill = GridBagConstraints.HORIZONTAL;
-		gbc_separator.gridwidth = 4;
+		gbc_separator.gridwidth = 5;
 		gbc_separator.insets = new Insets(0, 0, 5, 0);
 		gbc_separator.gridx = 0;
 		gbc_separator.gridy = 1;
@@ -126,6 +147,7 @@ public class AdminPanel extends JPanel {
 		lvlsUsers.addItem(new Levels(2, Levels.LEVEL_ADMIN));
 		lvlsUsers.setSelectedIndex(0);
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
+		gbc_comboBox.gridwidth = 2;
 		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 2;
@@ -133,7 +155,7 @@ public class AdminPanel extends JPanel {
 		add(lvlsUsers, gbc_comboBox);
 		GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
 		gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
-		gbc_btnNewButton_1.gridx = 3;
+		gbc_btnNewButton_1.gridx = 4;
 		gbc_btnNewButton_1.gridy = 2;
 		add(btnAddResource, gbc_btnNewButton_1);
 
@@ -141,7 +163,7 @@ public class AdminPanel extends JPanel {
 		separator_1.setPreferredSize(new Dimension(20, 20));
 		GridBagConstraints gbc_separator_1 = new GridBagConstraints();
 		gbc_separator_1.fill = GridBagConstraints.HORIZONTAL;
-		gbc_separator_1.gridwidth = 4;
+		gbc_separator_1.gridwidth = 5;
 		gbc_separator_1.insets = new Insets(0, 0, 5, 0);
 		gbc_separator_1.gridx = 0;
 		gbc_separator_1.gridy = 3;
@@ -161,6 +183,7 @@ public class AdminPanel extends JPanel {
 		gbc_cmbUsers.gridy = 4;
 		add(cmbUsers, gbc_cmbUsers);
 		GridBagConstraints gbc_cmbProject = new GridBagConstraints();
+		gbc_cmbProject.gridwidth = 2;
 		gbc_cmbProject.insets = new Insets(0, 0, 5, 5);
 		gbc_cmbProject.fill = GridBagConstraints.HORIZONTAL;
 		gbc_cmbProject.gridx = 2;
@@ -181,7 +204,7 @@ public class AdminPanel extends JPanel {
 		});
 		GridBagConstraints gbc_btnRemove = new GridBagConstraints();
 		gbc_btnRemove.insets = new Insets(0, 0, 5, 0);
-		gbc_btnRemove.gridx = 3;
+		gbc_btnRemove.gridx = 4;
 		gbc_btnRemove.gridy = 4;
 		add(btnRemove, gbc_btnRemove);
 
@@ -189,7 +212,7 @@ public class AdminPanel extends JPanel {
 		separator_2.setPreferredSize(new Dimension(20, 20));
 		GridBagConstraints gbc_separator_2 = new GridBagConstraints();
 		gbc_separator_2.fill = GridBagConstraints.HORIZONTAL;
-		gbc_separator_2.gridwidth = 4;
+		gbc_separator_2.gridwidth = 5;
 		gbc_separator_2.insets = new Insets(0, 0, 5, 0);
 		gbc_separator_2.gridx = 0;
 		gbc_separator_2.gridy = 5;
@@ -197,7 +220,7 @@ public class AdminPanel extends JPanel {
 
 		JLabel lblNoteTheseCannot = new JLabel("Note these cannot be removed. Add carefully!");
 		GridBagConstraints gbc_lblNoteTheseCannot = new GridBagConstraints();
-		gbc_lblNoteTheseCannot.gridwidth = 4;
+		gbc_lblNoteTheseCannot.gridwidth = 5;
 		gbc_lblNoteTheseCannot.gridx = 0;
 		gbc_lblNoteTheseCannot.gridy = 6;
 		add(lblNoteTheseCannot, gbc_lblNoteTheseCannot);
